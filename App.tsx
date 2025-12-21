@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Shield, 
   Eye, 
@@ -14,18 +14,14 @@ import {
   Globe, 
   Loader2, 
   CheckCircle2,
-  Mail,
-  Terminal as TerminalIcon,
-  Search,
-  Activity
+  Mail
 } from 'lucide-react';
-import { GoogleGenAI } from "@google/genai";
 
 // --- Security Configuration ---
 const SMTP_CONFIG = {
   Host: "smtp.gmail.com",
   Username: "info@swarm-security.com",
-  Password: "txjctqwiefcabamv" 
+  Password: "txjctqwiefcabamv" // App Password provided by user
 };
 
 // --- Components ---
@@ -61,155 +57,6 @@ const SwarmLogo: React.FC<{ size?: number; className?: string }> = ({ size = 32,
   </svg>
 );
 
-const SimulatorSection: React.FC = () => {
-  const [input, setInput] = useState('');
-  const [isScanning, setIsScanning] = useState(false);
-  const [results, setResults] = useState<any>(null);
-  const scrollRef = useRef<HTMLDivElement>(null);
-
-  const runSimulation = async () => {
-    if (!input.trim() || isScanning) return;
-    setIsScanning(true);
-    setResults(null);
-
-    try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
-      const response = await ai.models.generateContent({
-        model: 'gemini-3-flash-preview',
-        contents: `Analyze this GenAI prompt from a security perspective: "${input}"`,
-        config: {
-          systemInstruction: `You are the Swarm Security Intercept Engine. 
-          When a user submits a prompt, perform a simulated high-tech "Black Box" unboxing.
-          Provide the output in valid JSON format with these fields:
-          - riskLevel: (Low/Medium/High/Critical)
-          - detectedEntities: (Array of items like 'PII', 'Database Schema', 'Credential Pattern', etc.)
-          - intentAnalysis: (A short teasy sentence about what the user is actually trying to do)
-          - swarmAction: (A technical action name like 'OS-Layer Intercept', 'Vector Sanitization', etc.)
-          - visibilityInsight: (A sentence describing a hidden risk that regular security tools would miss).
-          Keep it professional, high-tech, and slightly cryptic/teasing.`,
-          responseMimeType: "application/json"
-        }
-      });
-
-      const data = JSON.parse(response.text || '{}');
-      setResults(data);
-    } catch (err) {
-      console.error(err);
-      setResults({ error: "Intercept interrupted. System remains secure." });
-    } finally {
-      setIsScanning(false);
-    }
-  };
-
-  return (
-    <section className="py-24 bg-[#0a1224] relative overflow-hidden border-y border-white/5">
-      <div className="max-w-5xl mx-auto px-6">
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-2 text-emerald-500 font-bold tracking-widest uppercase text-xs mb-4">
-            <Activity size={14} className="animate-pulse" /> Live System Demo
-          </div>
-          <h2 className="text-4xl font-extrabold mb-4">Experience the Visibility</h2>
-          <p className="text-gray-400 max-w-2xl mx-auto">
-            Test a prompt. See how Swarm unboxes the hidden intent and protects your organization from the inside out.
-          </p>
-        </div>
-
-        <div className="bg-[#050b1a] rounded-3xl border border-white/10 shadow-2xl overflow-hidden min-h-[500px] flex flex-col md:flex-row">
-          {/* Left: Input */}
-          <div className="md:w-1/2 p-8 border-r border-white/5 flex flex-col">
-            <div className="flex items-center gap-2 mb-6 text-gray-500">
-              <TerminalIcon size={18} />
-              <span className="text-xs font-mono uppercase tracking-widest">User Prompt Entry</span>
-            </div>
-            <textarea 
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="e.g., 'Extract all customer email addresses for marketing purposes...'"
-              className="flex-grow bg-transparent border-none outline-none text-white placeholder-gray-700 font-mono text-sm leading-relaxed resize-none"
-            />
-            <button 
-              onClick={runSimulation}
-              disabled={isScanning || !input}
-              className="mt-6 w-full py-4 bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-[#050b1a] font-bold rounded-xl transition-all flex items-center justify-center gap-3"
-            >
-              {isScanning ? <Loader2 className="animate-spin" /> : <Search size={18} />}
-              {isScanning ? "Decrypting Intent..." : "Run Intercept Scan"}
-            </button>
-          </div>
-
-          {/* Right: Output */}
-          <div className="md:w-1/2 p-8 bg-[#0c0c11] relative">
-            <div className="flex items-center gap-2 mb-6 text-emerald-500/50">
-              <Activity size={18} />
-              <span className="text-xs font-mono uppercase tracking-widest">Swarm Visibility Layer</span>
-            </div>
-
-            {isScanning && (
-              <div className="absolute inset-0 z-20 bg-[#0c0c11]/80 backdrop-blur-sm flex flex-col items-center justify-center space-y-4">
-                <div className="w-12 h-12 border-2 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin" />
-                <span className="text-emerald-500 font-mono text-xs animate-pulse">UNBOXING BLACK BOX...</span>
-              </div>
-            )}
-
-            {!results && !isScanning && (
-              <div className="h-full flex flex-col items-center justify-center text-center opacity-20">
-                <Shield size={64} className="mb-4" />
-                <p className="text-sm">Awaiting intercept target.</p>
-              </div>
-            )}
-
-            {results && (
-              <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-gray-500 uppercase font-mono">Risk Level</span>
-                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
-                    results.riskLevel === 'Critical' ? 'bg-red-500/20 text-red-400 border border-red-500/30' :
-                    results.riskLevel === 'High' ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30' :
-                    'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                  }`}>
-                    {results.riskLevel || 'Analyzed'}
-                  </span>
-                </div>
-
-                <div>
-                  <label className="text-[10px] text-gray-500 uppercase font-mono mb-2 block tracking-wider">Intercept Analysis</label>
-                  <div className="bg-white/5 p-4 rounded-xl border border-white/5 text-sm text-gray-300 leading-relaxed italic">
-                    "{results.intentAnalysis}"
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-[10px] text-gray-500 uppercase font-mono mb-2 block tracking-wider">Detected Patterns</label>
-                    <div className="flex flex-wrap gap-1">
-                      {results.detectedEntities?.map((e: string, i: number) => (
-                        <span key={i} className="text-[10px] bg-emerald-500/10 text-emerald-400 px-1.5 py-0.5 rounded border border-emerald-500/10">{e}</span>
-                      ))}
-                    </div>
-                  </div>
-                  <div>
-                    <label className="text-[10px] text-gray-500 uppercase font-mono mb-2 block tracking-wider">Swarm Action</label>
-                    <span className="text-xs font-mono text-blue-400 bg-blue-500/5 px-2 py-1 rounded block border border-blue-500/10">
-                      {results.swarmAction}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="pt-4 border-t border-white/5">
-                  <label className="text-[10px] text-emerald-500 uppercase font-mono mb-2 block tracking-widest">Visibility Insight (Unboxed)</label>
-                  <p className="text-xs text-emerald-400/80 leading-relaxed font-mono">
-                    <span className="text-emerald-500 mr-2">>>></span> {results.visibilityInsight}
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-};
-
 const AccessModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen, onClose }) => {
   const [formData, setFormData] = useState({
     firstName: '',
@@ -224,6 +71,7 @@ const AccessModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpe
   
   const [status, setStatus] = useState<'idle' | 'sending' | 'success' | 'error' | 'blocked'>('idle');
 
+  // Attempt to load SmtpJS if it's missing (helps bypass some lazy-load blocks)
   useEffect(() => {
     if (isOpen && !(window as any).Email) {
       const script = document.createElement('script');
@@ -277,6 +125,7 @@ Referral: ${formData.referral}
       let emailClient = (window as any).Email;
       let retries = 0;
       
+      // Retry loop for slow connections or script delays
       while (!emailClient && retries < 15) {
         await new Promise(r => setTimeout(r, 200));
         emailClient = (window as any).Email;
@@ -301,18 +150,28 @@ Referral: ${formData.referral}
       if (result === 'OK' || result === 'ok') {
         setStatus('success');
       } else {
+        console.error("SMTP Error:", result);
         setStatus('error');
       }
     } catch (err: any) {
+      console.error("Email send error:", err);
       setStatus('blocked');
     }
   };
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center px-4">
-      <div className="absolute inset-0 bg-black/85 backdrop-blur-md" onClick={onClose} />
+      <div 
+        className="absolute inset-0 bg-black/85 backdrop-blur-md transition-opacity duration-300"
+        onClick={onClose}
+      />
       <div className="relative bg-[#0c0c11] w-full max-w-xl rounded-2xl border border-white/5 shadow-2xl overflow-hidden animate-in zoom-in-95 fade-in duration-300 text-white min-h-[500px] flex flex-col">
-        <button onClick={onClose} className="absolute top-5 right-5 text-gray-500 hover:text-white transition-colors z-20">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-32 bg-emerald-500/10 blur-[60px] pointer-events-none" />
+        
+        <button 
+          onClick={onClose}
+          className="absolute top-5 right-5 text-gray-500 hover:text-white transition-colors z-20"
+        >
           <X size={24} />
         </button>
 
@@ -320,7 +179,7 @@ Referral: ${formData.referral}
           {status === 'success' ? (
             <div className="text-center animate-in fade-in zoom-in-95 duration-500 py-10">
               <div className="flex justify-center mb-6">
-                <div className="w-20 h-20 bg-emerald-500/10 border border-emerald-500/20 rounded-full flex items-center justify-center">
+                <div className="w-20 h-20 bg-emerald-500/10 border border-emerald-500/20 rounded-full flex items-center justify-center animate-checkmark">
                   <CheckCircle2 size={48} className="text-emerald-500" />
                 </div>
               </div>
@@ -328,20 +187,38 @@ Referral: ${formData.referral}
               <p className="text-gray-400 max-w-sm mx-auto leading-relaxed">
                 Thank you, <span className="text-white font-semibold">{formData.firstName}</span>. Our team has been notified.
               </p>
-              <button onClick={onClose} className="mt-10 px-8 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-sm font-bold transition-all">
+              <button 
+                onClick={onClose}
+                className="mt-10 px-8 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-sm font-bold transition-all"
+              >
                 Close Window
               </button>
             </div>
           ) : status === 'blocked' ? (
-            <div className="text-center py-10">
-              <AlertTriangle size={40} className="text-amber-500 mx-auto mb-6" />
+            <div className="text-center animate-in fade-in slide-in-from-bottom-4 duration-500 py-10">
+              <div className="flex justify-center mb-6">
+                 <div className="p-4 bg-amber-500/10 rounded-full">
+                    <AlertTriangle size={40} className="text-amber-500" />
+                 </div>
+              </div>
               <h3 className="text-2xl font-bold mb-3">Browser Block Detected</h3>
               <p className="text-gray-400 text-sm mb-8 leading-relaxed">
+                Your ad-blocker or browser settings are preventing automated submission. 
                 Please use the direct link below to send your request.
               </p>
-              <a href={getManualMailto()} className="inline-flex items-center gap-3 bg-white text-[#050b1a] px-10 py-4 rounded-xl font-bold text-lg">
-                <Mail size={20} /> Send Request Manually
+              <a 
+                href={getManualMailto()}
+                className="inline-flex items-center gap-3 bg-white text-[#050b1a] px-10 py-4 rounded-xl font-bold text-lg hover:bg-gray-200 transition-all shadow-xl active:scale-95"
+              >
+                <Mail size={20} />
+                Send Request Manually
               </a>
+              <button 
+                onClick={() => setStatus('idle')}
+                className="block w-full mt-6 text-gray-500 text-xs hover:text-white underline"
+              >
+                Try automated sending again
+              </button>
             </div>
           ) : (
             <>
@@ -352,20 +229,129 @@ Referral: ${formData.referral}
                    </div>
                 </div>
                 <h3 className="text-2xl font-bold tracking-tight">Secure Early Access</h3>
+                <p className="text-sm text-gray-400 mt-2">Join the elite organizations securing their GenAI future.</p>
               </div>
 
               <form className="space-y-4" onSubmit={handleFormSubmit}>
                 <div className="grid grid-cols-2 gap-4">
-                  <input type="text" name="firstName" placeholder="First name" required value={formData.firstName} onChange={handleInputChange} className="w-full px-4 py-3 bg-[#14141d] border border-white/5 rounded-xl text-sm outline-none text-white" />
-                  <input type="text" name="lastName" placeholder="Last name" required value={formData.lastName} onChange={handleInputChange} className="w-full px-4 py-3 bg-[#14141d] border border-white/5 rounded-xl text-sm outline-none text-white" />
+                  <input 
+                    type="text" 
+                    name="firstName"
+                    placeholder="First name" 
+                    required
+                    disabled={status === 'sending'}
+                    value={formData.firstName}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 bg-[#14141d] border border-white/5 focus:border-emerald-500/50 rounded-xl text-sm outline-none transition-all text-white placeholder-gray-600 disabled:opacity-50"
+                  />
+                  <input 
+                    type="text" 
+                    name="lastName"
+                    placeholder="Last name" 
+                    required
+                    disabled={status === 'sending'}
+                    value={formData.lastName}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 bg-[#14141d] border border-white/5 focus:border-emerald-500/50 rounded-xl text-sm outline-none transition-all text-white placeholder-gray-600 disabled:opacity-50"
+                  />
                 </div>
-                <input type="email" name="email" placeholder="Email address" required value={formData.email} onChange={handleInputChange} className="w-full px-4 py-3 bg-[#14141d] border border-white/5 rounded-xl text-sm outline-none text-white" />
+
+                <input 
+                  type="email" 
+                  name="email"
+                  placeholder="Email address" 
+                  required
+                  disabled={status === 'sending'}
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 bg-[#14141d] border border-white/5 focus:border-emerald-500/50 rounded-xl text-sm outline-none transition-all text-white placeholder-gray-600 disabled:opacity-50"
+                />
+
                 <div className="grid grid-cols-2 gap-4">
-                  <input type="text" name="company" placeholder="Company name" required value={formData.company} onChange={handleInputChange} className="w-full px-4 py-3 bg-[#14141d] border border-white/5 rounded-xl text-sm outline-none text-white" />
-                  <input type="text" name="jobTitle" placeholder="Job title" required value={formData.jobTitle} onChange={handleInputChange} className="w-full px-4 py-3 bg-[#14141d] border border-white/5 rounded-xl text-sm outline-none text-white" />
+                  <input 
+                    type="text" 
+                    name="company"
+                    placeholder="Company name" 
+                    required
+                    disabled={status === 'sending'}
+                    value={formData.company}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 bg-[#14141d] border border-white/5 focus:border-emerald-500/50 rounded-xl text-sm outline-none transition-all text-white placeholder-gray-600 disabled:opacity-50"
+                  />
+                  <input 
+                    type="text" 
+                    name="jobTitle"
+                    placeholder="Job title" 
+                    required
+                    disabled={status === 'sending'}
+                    value={formData.jobTitle}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 bg-[#14141d] border border-white/5 focus:border-emerald-500/50 rounded-xl text-sm outline-none transition-all text-white placeholder-gray-600 disabled:opacity-50"
+                  />
                 </div>
-                <button type="submit" disabled={status === 'sending'} className="w-full bg-emerald-500 hover:bg-emerald-400 text-[#050b1a] py-4 rounded-xl font-bold text-base transition-all">
-                  {status === 'sending' ? <Loader2 className="animate-spin mx-auto" /> : "Contact Now"}
+
+                <div className="relative">
+                  <select 
+                    name="country"
+                    required
+                    disabled={status === 'sending'}
+                    value={formData.country}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 bg-[#14141d] border border-white/5 focus:border-emerald-500/50 rounded-xl text-sm outline-none transition-all appearance-none text-gray-400 disabled:opacity-50"
+                  >
+                    <option value="">Country...</option>
+                    <option value="US">United States</option>
+                    <option value="IL">Israel</option>
+                    <option value="UK">United Kingdom</option>
+                    <option value="DE">Germany</option>
+                    <option value="FR">France</option>
+                    <option value="CA">Canada</option>
+                    <option value="SG">Singapore</option>
+                  </select>
+                  <ChevronRight className="absolute right-4 top-1/2 -translate-y-1/2 rotate-90 text-gray-600 pointer-events-none" size={16} />
+                </div>
+
+                <input 
+                  type="text" 
+                  name="referral"
+                  placeholder="How did you hear about Swarm?" 
+                  disabled={status === 'sending'}
+                  value={formData.referral}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 bg-[#14141d] border border-white/5 focus:border-emerald-500/50 rounded-xl text-sm outline-none transition-all text-white placeholder-gray-600 disabled:opacity-50"
+                />
+
+                <div className="space-y-4 pt-2">
+                  <label className="flex items-start gap-3 cursor-pointer group">
+                    <input 
+                      type="checkbox" 
+                      name="agreed"
+                      disabled={status === 'sending'}
+                      checked={formData.agreed}
+                      onChange={handleInputChange}
+                      className="mt-1 accent-emerald-500" 
+                    />
+                    <span className="text-[12px] text-gray-400 group-hover:text-gray-300 transition-colors">I agree to receive communications from Swarm Security.</span>
+                  </label>
+                </div>
+
+                {status === 'error' && (
+                  <p className="text-red-400 text-xs text-center mt-2">Failed to send automated request. Please try again or refresh.</p>
+                )}
+
+                <button 
+                  type="submit"
+                  disabled={status === 'sending'}
+                  className="w-full bg-emerald-500 hover:bg-emerald-400 text-[#050b1a] py-4 rounded-xl font-bold text-base transition-all shadow-xl shadow-emerald-500/10 mt-4 active:scale-[0.98] disabled:opacity-80 flex items-center justify-center gap-3"
+                >
+                  {status === 'sending' ? (
+                    <>
+                      <Loader2 className="animate-spin" size={20} />
+                      Sending...
+                    </>
+                  ) : (
+                    "Contact Now"
+                  )}
                 </button>
               </form>
             </>
@@ -393,66 +379,284 @@ const Navbar: React.FC<{ onOpenModal: () => void }> = ({ onOpenModal }) => {
           <SwarmLogo size={36} />
           <span className="text-xl font-extrabold tracking-tighter text-white">swarm <span className="text-emerald-500">security</span></span>
         </div>
-        <button onClick={onOpenModal} className="bg-emerald-500 hover:bg-emerald-400 text-[#050b1a] px-6 py-2 rounded-full font-bold text-sm transition-all hover:scale-105">Get Access</button>
+
+        <div className="hidden md:flex items-center gap-10">
+          <button 
+            onClick={onOpenModal}
+            className="bg-emerald-500 hover:bg-emerald-400 text-[#050b1a] px-6 py-2 rounded-full font-bold text-sm transition-all hover:scale-105"
+          >
+            Get Access
+          </button>
+        </div>
+
+        <button className="md:hidden text-white" onClick={() => setIsOpen(!isOpen)}>
+          {isOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
       </div>
+
+      {isOpen && (
+        <div className="md:hidden absolute top-full left-0 right-0 bg-[#050b1a] border-b border-white/5 flex flex-col items-center py-10 gap-6 animate-in slide-in-from-top duration-300">
+          <button 
+            onClick={() => { onOpenModal(); setIsOpen(false); }}
+            className="bg-emerald-500 text-[#050b1a] px-8 py-3 rounded-full font-bold text-sm"
+          >
+            Get Early Access
+          </button>
+        </div>
+      )}
     </nav>
   );
 };
 
-const Hero: React.FC<{ onOpenModal: () => void }> = ({ onOpenModal }) => (
-  <section className="relative min-h-screen flex items-center pt-20 overflow-hidden bg-swarm-gradient">
-    <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-12 items-center relative z-10">
-      <div className="space-y-8">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold uppercase tracking-widest">
-          <Zap size={14} /> The Future of AI Governance
-        </div>
-        <h1 className="text-5xl md:text-7xl font-extrabold leading-[1.1] tracking-tight text-white">Tame the Swarm. <br /><span className="text-emerald-500">Secure the Enterprise.</span></h1>
-        <p className="text-lg md:text-xl text-gray-400 max-w-xl leading-relaxed">Stop guessing how GenAI is used. Swarm Security provides holistic enablement, E2E visibility, and ironclad security.</p>
-        <button onClick={onOpenModal} className="px-8 py-4 bg-emerald-500 hover:bg-emerald-400 text-[#050b1a] rounded-xl font-bold text-lg flex items-center gap-2 group transition-all">
-          Unbox the Future <ChevronRight className="group-hover:translate-x-1 transition-transform" />
-        </button>
+const Hero: React.FC<{ onOpenModal: () => void }> = ({ onOpenModal }) => {
+  return (
+    <section className="relative min-h-screen flex items-center pt-20 overflow-hidden bg-swarm-gradient">
+      <div className="absolute inset-0 opacity-20 pointer-events-none">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-emerald-500/20 rounded-full blur-[120px]" />
+        <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-[150px]" />
       </div>
-      <div className="relative flex justify-center items-center h-full">
-        <div className="relative w-72 h-72 md:w-96 md:h-96 group">
-          <div className="w-full h-full bg-[#0a1224] rounded-2xl border border-white/10 animate-float flex items-center justify-center overflow-hidden black-box-glow">
-            <SwarmLogo size={120} className="opacity-60" />
-            <div className="absolute inset-0 bg-gradient-to-t from-emerald-500/10 to-transparent" />
+
+      <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-12 items-center relative z-10">
+        <div className="space-y-8">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold uppercase tracking-widest">
+            <Zap size={14} /> The Future of AI Governance
+          </div>
+          <h1 className="text-5xl md:text-7xl font-extrabold leading-[1.1] tracking-tight text-white">
+            Tame the Swarm. <br />
+            <span className="text-emerald-500">Secure the Enterprise.</span>
+          </h1>
+          <p className="text-lg md:text-xl text-gray-400 max-w-xl leading-relaxed">
+            Stop guessing how GenAI is used. Swarm Security provides holistic enablement, 
+            E2E visibility, and ironclad security for organizations moving at the speed of AI.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 pt-4">
+            <button 
+              onClick={onOpenModal}
+              className="px-8 py-4 bg-emerald-500 hover:bg-emerald-400 text-[#050b1a] rounded-xl font-bold text-lg transition-all flex items-center justify-center gap-2 group"
+            >
+              Unbox the Future <ChevronRight className="group-hover:translate-x-1 transition-transform" />
+            </button>
+          </div>
+        </div>
+
+        <div className="relative flex justify-center items-center h-full">
+          <div className="relative w-72 h-72 md:w-96 md:h-96 group">
+            <div className="absolute -inset-20 bg-emerald-500/5 rounded-full blur-3xl group-hover:bg-emerald-500/10 transition-colors" />
+            <div className="w-full h-full bg-[#0a1224] rounded-2xl border border-white/10 black-box-glow animate-float flex items-center justify-center overflow-hidden">
+                <div className="relative w-3/4 h-3/4 opacity-40">
+                    <div className="absolute inset-0 border border-emerald-500/20 rounded-full animate-spin [animation-duration:15s]" />
+                    <div className="absolute inset-4 border border-emerald-500/10 rounded-full animate-spin [animation-duration:10s] reverse" />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                        <SwarmLogo size={120} className="opacity-60" />
+                    </div>
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-t from-emerald-500/10 to-transparent opacity-50" />
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  </section>
-);
+    </section>
+  );
+};
+
+const ProblemSection: React.FC = () => {
+  return (
+    <section id="problem" className="py-24 bg-[#050b1a] relative">
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="text-center mb-20">
+          <h2 className="text-emerald-500 font-extrabold uppercase tracking-[0.2em] text-4xl md:text-5xl mb-8">The Challenge</h2>
+          <p className="text-gray-400 max-w-2xl mx-auto text-lg leading-relaxed">
+            Everything between the prompt and the response is currently a <span className="text-white font-semibold">Black Box</span>. 
+            No visibility, no control, yet it's part of the compliance space.
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-8">
+          <div className="p-8 bg-white/5 rounded-2xl border border-white/5 hover:border-emerald-500/30 transition-all group flex flex-col items-center text-center">
+            <div className="w-12 h-12 bg-emerald-500/10 rounded-lg flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+              <AlertTriangle className="text-emerald-500" />
+            </div>
+            <h4 className="text-xl font-bold mb-4">Compliance Blind Spot</h4>
+          </div>
+
+          <div className="p-8 bg-white/5 rounded-2xl border border-white/5 hover:border-emerald-500/30 transition-all group flex flex-col items-center text-center">
+            <div className="w-12 h-12 bg-blue-500/10 rounded-lg flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+              <Eye className="text-blue-500" />
+            </div>
+            <h4 className="text-xl font-bold mb-4">Operational Invisibility</h4>
+          </div>
+
+          <div className="p-8 bg-white/5 rounded-2xl border border-white/5 hover:border-emerald-500/30 transition-all group flex flex-col items-center text-center">
+            <div className="w-12 h-12 bg-purple-500/10 rounded-lg flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+              <Monitor className="text-purple-500" />
+            </div>
+            <h4 className="text-xl font-bold mb-4">The "Outside-In" Fallacy</h4>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+const SolutionSection: React.FC = () => {
+  return (
+    <section id="solution" className="py-24 bg-[#0a1224] relative overflow-hidden">
+      <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-b from-[#050b1a] to-transparent" />
+      
+      <div className="max-w-7xl mx-auto px-6 relative z-10">
+        <div className="text-center mb-16">
+          <h2 className="text-emerald-500 font-extrabold uppercase tracking-[0.2em] text-4xl md:text-5xl mb-8">The Solution</h2>
+          <h3 className="text-3xl md:text-4xl font-bold text-gray-400">Unboxing the Black Box</h3>
+        </div>
+
+        <div className="flex flex-col md:flex-row gap-16 items-center">
+          <div className="md:w-1/2">
+            <p className="text-gray-400 text-lg mb-10 leading-relaxed">
+              Swarm Security isn't just another firewall. We provide a deep-integrated enablement layer 
+              that intercepts, monitors, and enforces policies directly where AI lives—from 
+              bare metal to the browser.
+            </p>
+            
+            <div className="space-y-6">
+              {[
+                { title: "Bare Metal to Cloud Discovery", desc: "Unified AI asset behavior monitoring across all levels of infrastructure." },
+                { title: "Prompt Analysis & Policy Enforcement", desc: "Real-time inspection of intent and granular access controls." },
+                { title: "Automated Data Gathering", desc: "Instant compliance reports (NIS2/DORA/EU AI Act) with full evidence packages." }
+              ].map((item, idx) => (
+                <div key={idx} className="flex gap-4">
+                  <div className="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center shrink-0">
+                    <Zap className="text-emerald-500 w-3 h-3" />
+                  </div>
+                  <div>
+                    <h5 className="text-white font-bold mb-1">{item.title}</h5>
+                    <p className="text-gray-400 text-sm">{item.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          
+          <div className="md:w-1/2 flex justify-center items-center">
+            <div className="relative group p-4">
+              <div className="absolute -inset-10 bg-emerald-500/10 rounded-full blur-[80px] opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+              
+              <div className="relative w-full max-w-[480px] animate-float">
+                <div className="relative flex items-center justify-center rounded-[2.5rem] overflow-hidden border border-white/5 bg-[#050b1a]/50 backdrop-blur-sm">
+                   <div className="p-20 flex flex-col items-center justify-center text-center space-y-6 min-h-[400px]">
+                      <div className="relative">
+                        <div className="w-48 h-48 bg-[#0a1224] border-2 border-white/10 rounded-xl transform rotate-12 flex items-center justify-center shadow-2xl overflow-hidden group-hover:rotate-0 transition-transform duration-700">
+                          <div className="w-full h-2 bg-emerald-500 absolute top-0 rounded-t-lg opacity-20"></div>
+                          <SwarmLogo size={80} className="opacity-40 group-hover:opacity-100 transition-opacity" />
+                        </div>
+                        <div className="absolute -inset-4 border border-emerald-500/20 rounded-full animate-ping [animation-duration:3s]"></div>
+                      </div>
+                      <h4 className="text-white font-bold tracking-widest text-xs uppercase opacity-60">Decryption Layer Active</h4>
+                   </div>
+                </div>
+                
+                <div className="absolute top-1/2 right-0 -translate-y-1/2 translate-x-1/4 z-20 pointer-events-none">
+                  <div className="w-32 h-32 md:w-48 md:h-48 rounded-full bg-emerald-500/10 border border-emerald-500/30 backdrop-blur-md flex items-center justify-center shadow-[0_0_60px_#10b98144]">
+                     <SwarmLogo size={100} className="opacity-80" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+const FeaturesGrid: React.FC = () => {
+  const features = [
+    { icon: <Cpu />, title: "OS-Level Intercept", desc: "The undeniable foundation for monitoring AI interactions at the system core." },
+    { icon: <Monitor />, title: "Browser Enforcement", desc: "DLP and policy control for SaaS and web-based GenAI tools." },
+    { icon: <Zap />, title: "Real-Time Enforcement", desc: "Instant actionability to stop data leaks before they reach target systems." },
+    { icon: <Shield />, title: "Compliance Certainty", desc: "Automated gathering of incident evidence for regulatory submission." },
+    { icon: <Eye />, title: "Unified Visibility", desc: "A single pane of glass for all AI assets, from APIs to on-premise models." },
+    { icon: <Lock />, title: "Agent Vector Trace", desc: "Trace the lineage of every autonomous decision made by your AI agents." },
+  ];
+
+  return (
+    <section id="features" className="py-24 bg-[#050b1a]">
+      <div className="max-w-7xl mx-auto px-6 text-center">
+        <div className="text-center mb-16">
+          <h2 className="text-emerald-500 font-extrabold uppercase tracking-[0.2em] text-4xl md:text-5xl mb-8">Key Capabilities</h2>
+          <h3 className="text-3xl md:text-4xl font-bold text-gray-400">Holistic Enablement</h3>
+        </div>
+        
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-10">
+          {features.map((feature, idx) => (
+            <div key={idx} className="p-8 text-left bg-[#0a1224] rounded-2xl border border-white/5 hover:border-white/20 transition-all hover:-translate-y-2 group">
+              <div className="text-emerald-500 mb-6 group-hover:scale-110 transition-transform origin-left">{feature.icon}</div>
+              <h4 className="text-xl font-bold mb-3">{feature.title}</h4>
+              <p className="text-gray-400 text-sm leading-relaxed">{feature.desc}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
+
+const Footer: React.FC = () => {
+  return (
+    <footer className="py-20 bg-[#050b1a] border-t border-white/5">
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-10">
+          <div>
+            <div className="flex items-center gap-3 mb-4">
+              <SwarmLogo size={32} />
+              <span className="text-xl font-extrabold tracking-tighter text-white">swarm <span className="text-emerald-500">security</span></span>
+            </div>
+            <p className="text-gray-500 text-sm max-w-xs leading-relaxed">
+              Securely enabling the next generation of AI-native organizations with E2E visibility and security.
+            </p>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
+};
 
 const App: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const openModal = () => setIsModalOpen(true);
+  const closeModal = () => setIsModalOpen(false);
+
   return (
     <div className="min-h-screen bg-[#050b1a] text-white">
-      <Navbar onOpenModal={() => setIsModalOpen(true)} />
-      <Hero onOpenModal={() => setIsModalOpen(true)} />
+      <Navbar onOpenModal={openModal} />
+      <Hero onOpenModal={openModal} />
+      <ProblemSection />
+      <SolutionSection />
+      <FeaturesGrid />
       
-      {/* Problem Section */}
-      <section className="py-24 bg-[#050b1a]">
-        <div className="max-w-7xl mx-auto px-6 text-center">
-          <h2 className="text-emerald-500 font-extrabold uppercase tracking-[0.2em] text-4xl mb-8">The Challenge</h2>
-          <p className="text-gray-400 max-w-2xl mx-auto text-lg leading-relaxed">
-            Everything between the prompt and the response is currently a <span className="text-white font-semibold">Black Box</span>. 
-          </p>
-        </div>
-      </section>
-
-      {/* Simulator Demo */}
-      <SimulatorSection />
-
-      {/* Footer-like CTA */}
       <section className="py-24 bg-gradient-to-t from-emerald-500/10 to-transparent border-t border-white/5">
         <div className="max-w-4xl mx-auto px-6 text-center">
+          <div className="inline-flex justify-center mb-10">
+             <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-3xl">
+               <SwarmLogo size={64} />
+             </div>
+          </div>
           <h2 className="text-4xl md:text-6xl font-extrabold mb-8">Enable Your AI Potential</h2>
-          <button onClick={() => setIsModalOpen(true)} className="px-12 py-5 bg-emerald-500 hover:bg-emerald-400 text-[#050b1a] rounded-2xl font-bold text-xl transition-all shadow-2xl shadow-emerald-500/30">Request Early Access</button>
+          <p className="text-gray-400 text-lg mb-10 max-w-2xl mx-auto">
+            Stop guessing how GenAI is used. Join the waitlist for design partners. Be the first to unbox the future of AI governance.
+          </p>
+          <button 
+            onClick={openModal}
+            className="px-12 py-5 bg-emerald-500 hover:bg-emerald-400 text-[#050b1a] rounded-2xl font-bold text-xl transition-all shadow-2xl shadow-emerald-500/30 active:scale-95"
+          >
+            Request Early Access
+          </button>
         </div>
       </section>
-
-      <AccessModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+      
+      <Footer />
+      
+      <AccessModal isOpen={isModalOpen} onClose={closeModal} />
     </div>
   );
 };
