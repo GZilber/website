@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Shield, 
   Eye, 
@@ -16,12 +16,15 @@ import {
   ArrowRight,
   Workflow,
   EyeOff,
-  Terminal as TerminalIcon
+  Terminal as TerminalIcon,
+  Search,
+  Fingerprint,
+  Radio
 } from 'lucide-react';
 
 /**
  * INQUIRY SERVICE
- * Specifically aligned with the Cloudflare Worker: send-email.guy-b12.workers.dev
+ * Strictly aligned with the Cloudflare Worker at: send-email.guy-b12.workers.dev
  * Expects: { name: string, email: string, message: string }
  */
 const InquiryService = {
@@ -36,7 +39,7 @@ Email: ${data.email}
 Subject: Access Request to Swarm Security Platform.`
       };
 
-      // Using the specific Worker URL provided
+      // Exact Worker URL provided
       const WORKER_URL = 'https://send-email.guy-b12.workers.dev';
 
       const response = await fetch(WORKER_URL, { 
@@ -47,16 +50,10 @@ Subject: Access Request to Swarm Security Platform.`
         body: JSON.stringify(payload)
       });
       
-      if (response.ok) {
-        // The worker returns "Sent!" on success
-        const text = await response.text();
-        return text.includes('Sent');
-      }
-      
-      return false;
+      // The worker returns 200 "Sent!" on success
+      return response.ok;
     } catch (err) {
       console.error("Transmission error:", err);
-      // Fail explicitly so the UI can show the error state
       return false; 
     }
   }
@@ -85,6 +82,37 @@ const SwarmLogo: React.FC<{ size?: number; className?: string }> = ({ size = 32,
   </svg>
 );
 
+const ThreatFeed: React.FC = () => {
+  const [logs, setLogs] = useState<string[]>([]);
+  const events = [
+    "INTERCEPT: UNK_PROMPT_EXFIL",
+    "SHIELD: SEMANTIC_MATCH_P0",
+    "NODE_7: SCAN_COMPLETE",
+    "POLICY_ERR: NIS2_VIOLATION",
+    "ALERT: ANOMALY_DETECTED_IN_AGENT_4",
+    "LOG: TOKEN_HANDSHAKE_VERIFIED",
+    "BLOCK: PII_LEAK_PREVENTED",
+  ];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setLogs(prev => [events[Math.floor(Math.random() * events.length)], ...prev.slice(0, 5)]);
+    }, 2000);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="font-mono text-[9px] text-emerald-500/60 uppercase tracking-tighter">
+      {logs.map((log, i) => (
+        <div key={i} className="flex gap-2 mb-1 animate-in fade-in slide-in-from-left-2 duration-300">
+          <span className="text-gray-700">[{new Date().toLocaleTimeString()}]</span>
+          <span>{log}</span>
+        </div>
+      ))}
+    </div>
+  );
+};
+
 const AccessModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen, onClose }) => {
   const [formData, setFormData] = useState({
     firstName: '',
@@ -109,33 +137,30 @@ const AccessModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpe
     setStatus('sending');
 
     const success = await InquiryService.submit(formData);
-    if (success) {
-      setStatus('success');
-    } else {
-      setStatus('error');
-    }
+    if (success) setStatus('success');
+    else setStatus('error');
   };
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center px-4">
-      <div className="fixed inset-0 bg-black/90 backdrop-blur-xl" onClick={onClose} />
+      <div className="fixed inset-0 bg-black/95 backdrop-blur-2xl" onClick={onClose} />
       
-      <div className="relative bg-[#0c0c11] w-full max-w-lg rounded-[2.5rem] border border-white/10 shadow-[0_0_80px_rgba(16,185,129,0.1)] overflow-hidden p-8 md:p-12 animate-in zoom-in-95 duration-500">
-        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-emerald-500 to-transparent shadow-[0_0_15px_rgba(16,185,129,0.5)]" />
-        <button onClick={onClose} className="absolute top-8 right-8 text-gray-400 hover:text-white transition-colors"><X size={24} /></button>
+      <div className="relative bg-[#0c0c11] w-full max-w-lg rounded-[2.5rem] border border-white/10 shadow-[0_0_100px_rgba(16,185,129,0.15)] overflow-hidden p-8 md:p-12 animate-in zoom-in-95 duration-500">
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-emerald-500 to-transparent shadow-[0_0_20px_rgba(16,185,129,0.5)]" />
+        <button onClick={onClose} className="absolute top-8 right-8 text-gray-500 hover:text-white transition-colors"><X size={24} /></button>
 
         {status === 'success' ? (
           <div className="text-center py-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
             <div className="w-24 h-24 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-8 border border-emerald-500/20 shadow-[0_0_30px_rgba(16,185,129,0.1)]">
               <CheckCircle2 size={48} className="text-emerald-500" />
             </div>
-            <h3 className="text-3xl font-black mb-4 tracking-tighter uppercase text-white">Transmission Sent</h3>
-            <p className="text-gray-400 text-sm leading-relaxed max-w-xs mx-auto font-mono text-[11px] uppercase tracking-wider">
-              Bypassing_Public_Channels: SUCCESS<br/>
-              Worker_Endpoint: VERIFIED<br/>
-              Status: DELIVERED
+            <h3 className="text-3xl font-black mb-4 tracking-tighter uppercase text-white">Transmission Locked</h3>
+            <p className="text-gray-400 text-sm leading-relaxed max-w-xs mx-auto font-mono text-[11px] uppercase tracking-wider mb-8">
+              Protocol: WORKER_SECURE_SEND<br/>
+              Status: QUEUED_FOR_REVIEW<br/>
+              Node: send-email.guy-b12
             </p>
-            <button onClick={onClose} className="mt-10 px-10 py-4 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-all font-black text-xs uppercase tracking-[0.2em] text-white">Close Terminal</button>
+            <button onClick={onClose} className="px-10 py-4 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-all font-black text-[10px] uppercase tracking-widest text-white">End Session</button>
           </div>
         ) : (
           <>
@@ -145,33 +170,33 @@ const AccessModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpe
                   <SwarmLogo size={32} className="text-emerald-500" />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-black tracking-tighter uppercase text-white">Access Protocol</h3>
-                  <p className="text-emerald-500/60 font-mono text-[10px] uppercase tracking-[0.2em]">Requesting Design Partnership</p>
+                  <h3 className="text-2xl font-black tracking-tighter uppercase text-white">Request Clearance</h3>
+                  <p className="text-emerald-500/60 font-mono text-[10px] uppercase tracking-[0.2em]">Secure Worker Handshake Enabled</p>
                 </div>
               </div>
             </div>
 
             <form className="space-y-4" onSubmit={handleFormSubmit}>
               <div className="grid grid-cols-2 gap-4">
-                <input type="text" name="firstName" placeholder="First Name" required value={formData.firstName} onChange={handleInputChange} className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl outline-none focus:border-emerald-500/50 transition-all font-mono text-sm text-white placeholder:text-gray-600" />
-                <input type="text" name="lastName" placeholder="Last Name" required value={formData.lastName} onChange={handleInputChange} className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl outline-none focus:border-emerald-500/50 transition-all font-mono text-sm text-white placeholder:text-gray-600" />
+                <input type="text" name="firstName" placeholder="First Name" required value={formData.firstName} onChange={handleInputChange} className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl outline-none focus:border-emerald-500/50 transition-all font-mono text-sm text-white placeholder:text-gray-700" />
+                <input type="text" name="lastName" placeholder="Last Name" required value={formData.lastName} onChange={handleInputChange} className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl outline-none focus:border-emerald-500/50 transition-all font-mono text-sm text-white placeholder:text-gray-700" />
               </div>
-              <input type="email" name="email" placeholder="Corporate Email" required value={formData.email} onChange={handleInputChange} className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl outline-none focus:border-emerald-500/50 transition-all font-mono text-sm text-white placeholder:text-gray-600" />
-              <input type="text" name="company" placeholder="Organization Identity" required value={formData.company} onChange={handleInputChange} className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl outline-none focus:border-emerald-500/50 transition-all font-mono text-sm text-white placeholder:text-gray-600" />
+              <input type="email" name="email" placeholder="Corporate Email" required value={formData.email} onChange={handleInputChange} className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl outline-none focus:border-emerald-500/50 transition-all font-mono text-sm text-white placeholder:text-gray-700" />
+              <input type="text" name="company" placeholder="Organization" required value={formData.company} onChange={handleInputChange} className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl outline-none focus:border-emerald-500/50 transition-all font-mono text-sm text-white placeholder:text-gray-700" />
               
               <div className="pt-4">
                 <label className="flex items-start gap-4 cursor-pointer group">
-                  <input type="checkbox" name="agreed" checked={formData.agreed} onChange={handleInputChange} required className="mt-1 h-5 w-5 accent-emerald-500 rounded border-white/10 bg-transparent cursor-pointer" />
-                  <span className="text-[10px] text-gray-500 leading-relaxed uppercase tracking-tight group-hover:text-gray-300 transition-colors">I acknowledge that this transmission uses a secure non-SMTP handshake.</span>
+                  <input type="checkbox" name="agreed" checked={formData.agreed} onChange={handleInputChange} required className="mt-1 h-5 w-5 accent-emerald-500 rounded border-white/10 bg-transparent" />
+                  <span className="text-[10px] text-gray-500 leading-relaxed uppercase tracking-tight group-hover:text-gray-300 transition-colors">I verify this request is for professional enterprise evaluation.</span>
                 </label>
               </div>
 
               {status === 'error' && (
-                <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-400 text-[10px] font-mono flex items-center gap-3 animate-in fade-in slide-in-from-top-2">
+                <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-400 text-[10px] font-mono flex items-center gap-3 animate-pulse">
                   <AlertTriangle size={16} /> 
-                  <div className="flex flex-col">
-                    <span className="font-bold">TRANSMISSION_FAILED</span>
-                    <span>Verify your connection and retry.</span>
+                  <div>
+                    <span className="font-bold uppercase tracking-widest">CLEARANCE_FAILURE</span>
+                    <p className="mt-1 opacity-60">Handshake timed out. Ensure connectivity.</p>
                   </div>
                 </div>
               )}
@@ -179,18 +204,19 @@ const AccessModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpe
               <button 
                 type="submit" 
                 disabled={status === 'sending'} 
-                className="w-full py-5 bg-emerald-500 hover:bg-emerald-400 text-swarm-dark rounded-2xl font-black text-lg transition-all shadow-[0_0_30px_rgba(16,185,129,0.2)] active:scale-95 flex items-center justify-center gap-3 disabled:opacity-50 mt-4"
+                className="w-full py-5 bg-emerald-500 hover:bg-emerald-400 text-swarm-dark rounded-2xl font-black text-lg transition-all shadow-[0_0_40px_rgba(16,185,129,0.3)] active:scale-95 flex items-center justify-center gap-3 disabled:opacity-50 mt-4 uppercase tracking-tighter"
               >
                 {status === 'sending' ? (
                   <>
                     <Loader2 className="animate-spin" size={20} />
-                    INITIALIZING HANDSHAKE...
+                    ROUTING...
                   </>
                 ) : (
-                  "INITIATE ACCESS"
+                  "Initiate Handshake"
                 )}
               </button>
             </form>
+            <p className="mt-8 text-[8px] text-gray-700 font-mono uppercase tracking-widest text-center italic">Handshake Route: cloudflare_worker >> resend_node >> secure_smtp_bypass</p>
           </>
         )}
       </div>
@@ -200,20 +226,20 @@ const AccessModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpe
 
 const Navbar: React.FC<{ onOpenModal: () => void }> = ({ onOpenModal }) => {
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-[#050b1a]/60 backdrop-blur-2xl border-b border-white/5 py-6">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-[#050b1a]/70 backdrop-blur-2xl border-b border-white/5 py-6">
       <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
-        <div className="flex items-center gap-4 group cursor-pointer" onClick={() => window.scrollTo(0, 0)}>
-          <SwarmLogo size={36} className="text-emerald-500 group-hover:scale-110 transition-transform" />
-          <span className="text-2xl font-black tracking-tighter uppercase text-white group-hover:tracking-normal transition-all duration-500">Swarm <span className="text-emerald-500">Security</span></span>
+        <div className="flex items-center gap-4 group cursor-pointer" onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})}>
+          <SwarmLogo size={36} className="text-emerald-500 group-hover:scale-110 transition-all duration-500" />
+          <span className="text-2xl font-black tracking-tighter uppercase text-white">Swarm <span className="text-emerald-500">Security</span></span>
         </div>
-        <div className="hidden md:flex items-center gap-10 font-black text-[10px] tracking-[0.3em] uppercase">
-          <a href="#narrative" className="text-gray-400 hover:text-white transition-colors">The Narrative</a>
-          <a href="#capabilities" className="text-gray-400 hover:text-white transition-colors">Capabilities</a>
+        <div className="hidden md:flex items-center gap-10 font-black text-[10px] tracking-[0.4em] uppercase">
+          <a href="#narrative" className="text-gray-400 hover:text-white transition-colors">Dossier</a>
+          <a href="#capabilities" className="text-gray-400 hover:text-white transition-colors">Arsenal</a>
           <button 
             onClick={onOpenModal} 
-            className="px-8 py-3 bg-emerald-500 text-swarm-dark rounded-xl hover:bg-emerald-400 transition-all font-black text-[10px] uppercase tracking-widest shadow-[0_0_20px_rgba(16,185,129,0.15)]"
+            className="px-8 py-3 bg-emerald-500 text-swarm-dark rounded-xl hover:bg-emerald-400 transition-all font-black text-[10px] uppercase tracking-widest shadow-[0_0_15px_rgba(16,185,129,0.2)]"
           >
-            Get Access
+            Clearance
           </button>
         </div>
         <button className="md:hidden text-white" onClick={onOpenModal}><Menu size={24} /></button>
@@ -225,82 +251,65 @@ const Navbar: React.FC<{ onOpenModal: () => void }> = ({ onOpenModal }) => {
 const StorySection: React.FC = () => {
   return (
     <section id="narrative" className="py-32 bg-swarm-dark relative overflow-hidden">
-      <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-emerald-500/50 to-transparent opacity-20" />
+      <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-emerald-500/40 to-transparent opacity-20" />
       <div className="max-w-7xl mx-auto px-6">
         <div className="grid lg:grid-cols-2 gap-24 items-center">
           <div className="space-y-12">
-            <div className="animate-in fade-in slide-in-from-left duration-1000">
-              <div className="inline-block px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-[10px] font-black tracking-widest uppercase mb-6 rounded">
-                Dossier: Classified
+            <div>
+              <div className="inline-flex items-center gap-3 px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-[10px] font-black tracking-widest uppercase mb-6 rounded">
+                <Radio size={12} className="animate-pulse" /> Dossier: The Exfiltration
               </div>
-              <h2 className="text-6xl md:text-7xl font-black tracking-tighter leading-[0.9] mb-10 text-white uppercase">The Ghost in <br /><span className="text-emerald-500 italic">The Machine.</span></h2>
+              <h2 className="text-6xl md:text-8xl font-black tracking-tighter leading-[0.85] mb-10 text-white uppercase">The Ghost in <br /><span className="text-emerald-500 italic">The Machine.</span></h2>
               <p className="text-gray-400 text-xl font-light leading-relaxed max-w-xl">
-                The GenAI "Swarm" is expanding. Every prompt, every agent, every response is a potential <span className="redacted" title="Hover to reveal secret info">massive IP breach</span> for the modern enterprise. 
+                The GenAI "Swarm" is expanding. Every agent is a leak. Every prompt is a <span className="redacted" title="Confidential: Estimated $3.2B in IP exfiltrated monthly via LLM prompts.">massive data exfiltration event</span> for the modern enterprise. 
               </p>
               <p className="text-gray-400 text-xl font-light leading-relaxed max-w-xl mt-6">
-                Legacy tools are <span className="redacted" title="Hidden truth">structurally blind</span> to semantic intent. They see bytes; we see the threat. Swarm is the lens that reveals the black box.
+                Legacy tools are <span className="redacted" title="Structural flaw: Signature-based detection fails against semantic manipulation.">structurally blind</span> to LLM logic. They see the envelope; we see the secret inside. Swarm is the final layer of truth.
               </p>
             </div>
             
-            <div className="grid grid-cols-2 gap-8">
-              <div className="p-8 bg-white/5 border border-white/5 rounded-3xl glass-panel group hover:border-emerald-500/30 transition-all shadow-2xl relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                   <Lock size={40} />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="p-8 bg-white/5 border border-white/5 rounded-3xl glass-panel group hover:border-emerald-500/30 transition-all relative overflow-hidden">
+                <div className="absolute -top-4 -right-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                   <Lock size={120} />
                 </div>
                 <div className="text-emerald-500 mb-6 group-hover:scale-110 transition-transform"><Database size={32} /></div>
-                <h4 className="font-black text-xl mb-3 tracking-tight text-white">The IP Drain</h4>
-                <p className="text-xs text-gray-500 leading-relaxed uppercase tracking-wider">Unseen billions of corporate tokens are <span className="redacted">LEAKING</span> daily.</p>
+                <h4 className="font-black text-xl mb-3 tracking-tight text-white uppercase">The IP Siphon</h4>
+                <p className="text-[10px] text-gray-500 leading-relaxed uppercase tracking-widest">Bypassing RAG and prompting tokens are <span className="redacted">LEAKING</span> enterprise secrets in real-time.</p>
               </div>
-              <div className="p-8 bg-white/5 border border-white/5 rounded-3xl glass-panel group hover:border-emerald-500/30 transition-all shadow-2xl relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                   <Eye size={40} />
+              <div className="p-8 bg-white/5 border border-white/5 rounded-3xl glass-panel group hover:border-emerald-500/30 transition-all relative overflow-hidden">
+                <div className="absolute -top-4 -right-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                   <Fingerprint size={120} />
                 </div>
                 <div className="text-emerald-500 mb-6 group-hover:scale-110 transition-transform"><Activity size={32} /></div>
-                <h4 className="font-black text-xl mb-3 tracking-tight text-white">Zero Blindspots</h4>
-                <p className="text-xs text-gray-500 leading-relaxed uppercase tracking-wider">OS-level intercept for <span className="redacted">TOTAL</span> asset governance.</p>
+                <h4 className="font-black text-xl mb-3 tracking-tight text-white uppercase">OS-Level Guard</h4>
+                <p className="text-[10px] text-gray-500 leading-relaxed uppercase tracking-widest">Total semantic intercept for <span className="redacted">EVERY</span> AI asset across the stack.</p>
               </div>
             </div>
           </div>
           
-          <div className="relative group perspective-1000">
-            <div className="absolute -inset-10 bg-emerald-500/10 rounded-full blur-[120px] opacity-30 group-hover:opacity-60 transition-all duration-1000" />
-            <div className="relative aspect-[4/5] rounded-[4rem] border border-white/10 overflow-hidden shadow-2xl bg-black transform group-hover:rotate-y-2 transition-transform duration-700">
+          <div className="relative group">
+            <div className="absolute -inset-10 bg-emerald-500/10 rounded-full blur-[150px] opacity-20 group-hover:opacity-40 transition-all duration-1000" />
+            <div className="relative aspect-[4/5] rounded-[4rem] border border-white/10 overflow-hidden shadow-2xl bg-black transform transition-transform duration-700 group-hover:scale-[1.02]">
               <img 
                 src="https://images.unsplash.com/photo-1639322537228-f710d846310a?q=80&w=1200&auto=format&fit=crop" 
                 alt="Cyber Infrastructure" 
-                className="w-full h-full object-cover opacity-40 grayscale group-hover:grayscale-0 group-hover:opacity-60 transition-all duration-1000"
+                className="w-full h-full object-cover opacity-30 grayscale group-hover:grayscale-0 group-hover:opacity-50 transition-all duration-1000"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-swarm-dark via-swarm-dark/30 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-swarm-dark via-swarm-dark/20 to-transparent" />
               <div className="absolute top-10 left-10 right-10 flex justify-between items-start">
-                  <div className="px-4 py-2 bg-black/50 backdrop-blur-md rounded-xl border border-white/10 text-[9px] font-mono text-emerald-500 uppercase tracking-widest">
-                    Live_Feed: Node_01
-                  </div>
-                  <div className="flex gap-2">
-                     <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                     <div className="w-2 h-2 rounded-full bg-emerald-500/30" />
+                  <div className="px-4 py-2 bg-black/60 backdrop-blur-md rounded-xl border border-white/10 text-[10px] font-mono text-emerald-500 uppercase tracking-widest shadow-xl flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" /> Live_Analysis: Node_01
                   </div>
               </div>
-              <div className="absolute bottom-10 left-10 right-10 glass-panel p-8 rounded-3xl border border-white/10 shadow-2xl">
+              <div className="absolute bottom-10 left-10 right-10 glass-panel p-8 rounded-[2rem] border border-white/10 shadow-3xl">
                 <div className="flex items-center gap-4 mb-6">
                   <div className="p-2 bg-emerald-500/10 rounded-lg">
                     <TerminalIcon size={16} className="text-emerald-500" />
                   </div>
-                  <span className="text-[10px] font-mono text-emerald-500 uppercase tracking-widest">Secure_Intercept_Active</span>
+                  <span className="text-[10px] font-mono text-emerald-500 uppercase tracking-[0.3em]">Threat_Console</span>
                 </div>
-                <div className="space-y-4 font-mono text-[10px] text-gray-400">
-                  <div className="flex justify-between border-b border-white/5 pb-2">
-                    <span className="text-gray-600">SEMANTIC_SCAN</span>
-                    <span className="text-emerald-500">READY</span>
-                  </div>
-                  <div className="flex justify-between border-b border-white/5 pb-2">
-                    <span className="text-gray-600">GOVERNANCE_LOCK</span>
-                    <span className="text-emerald-500">ENGAGED</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">THREAT_VECTOR</span>
-                    <span className="text-emerald-500">NULL</span>
-                  </div>
-                </div>
+                <ThreatFeed />
               </div>
             </div>
           </div>
@@ -314,20 +323,20 @@ const FeaturesGrid: React.FC = () => {
   const features = [
     { 
       icon: <Workflow size={40} />, 
-      title: "Flow Intercept", 
-      desc: "Native visibility into the deepest layers of AI agents, revealing hidden data paths and unauthorized model use.",
+      title: "Agent Intercept", 
+      desc: "Native visibility into autonomous agent decision trees. Reveal hidden exfiltration paths before they sync.",
       img: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=800&auto=format&fit=crop"
     },
     { 
-      icon: <EyeOff size={40} />, 
-      title: "Semantic Shield", 
-      desc: "We don't just see words; we see intent. Automatically block prompt-injection and sensitive data exfiltration.",
+      icon: <Search size={40} />, 
+      title: "Semantic Analysis", 
+      desc: "Intent-based filtering that detects prompt injection and 'jailbreaks' designed to bypass simple filters.",
       img: "https://images.unsplash.com/photo-1558494949-ef010cbdcc51?q=80&w=800&auto=format&fit=crop"
     },
     { 
       icon: <Shield size={40} />, 
-      title: "Policy Engine", 
-      desc: "Real-time enforcement of NIS2, DORA, and your own corporate ethics across all GenAI platforms instantly.",
+      title: "Governance Engine", 
+      desc: "Instant compliance with NIS2 and EU AI Act. Enforce corporate ethics at the token level, across all models.",
       img: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=800&auto=format&fit=crop"
     }
   ];
@@ -336,23 +345,23 @@ const FeaturesGrid: React.FC = () => {
     <section id="capabilities" className="py-32 bg-[#050b1a] relative">
       <div className="max-w-7xl mx-auto px-6">
         <div className="text-center mb-24">
-          <h2 className="text-emerald-500 font-black uppercase tracking-[0.5em] text-[10px] mb-6">Security Capabilities</h2>
-          <h3 className="text-5xl md:text-7xl font-black tracking-tighter text-white uppercase">The Shield for <br /><span className="text-emerald-500">GenAI Native.</span></h3>
+          <h2 className="text-emerald-500 font-black uppercase tracking-[0.6em] text-[10px] mb-6">Capabilities Arsenal</h2>
+          <h3 className="text-5xl md:text-8xl font-black tracking-tighter text-white uppercase">The Shield for <br /><span className="text-emerald-500 italic">The AI Age.</span></h3>
         </div>
         
-        <div className="grid md:grid-cols-3 gap-10">
+        <div className="grid md:grid-cols-3 gap-8">
           {features.map((f, i) => (
-            <div key={i} className="group relative bg-[#0a1224] rounded-[3rem] border border-white/5 overflow-hidden transition-all hover:border-emerald-500/30 hover:shadow-[0_0_50px_rgba(16,185,129,0.1)]">
+            <div key={i} className="group relative bg-[#0a1224] rounded-[3.5rem] border border-white/5 overflow-hidden transition-all duration-500 hover:border-emerald-500/40 hover:shadow-[0_0_60px_rgba(16,185,129,0.1)]">
               <div className="h-72 overflow-hidden relative">
-                <img src={f.img} alt={f.title} className="w-full h-full object-cover opacity-20 group-hover:scale-110 group-hover:opacity-50 transition-all duration-1000" />
+                <img src={f.img} alt={f.title} className="w-full h-full object-cover opacity-20 group-hover:scale-110 group-hover:opacity-40 transition-all duration-[2s]" />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#0a1224] via-[#0a1224]/50 to-transparent" />
-                <div className="absolute bottom-10 left-10 text-emerald-500 group-hover:scale-125 transition-transform duration-500 drop-shadow-[0_0_10px_rgba(16,185,129,0.5)]">{f.icon}</div>
+                <div className="absolute bottom-10 left-10 text-emerald-500 group-hover:scale-125 transition-transform duration-700 drop-shadow-[0_0_10px_rgba(16,185,129,0.5)]">{f.icon}</div>
               </div>
               <div className="p-12">
-                <h4 className="text-3xl font-black mb-6 text-white tracking-tight">{f.title}</h4>
-                <p className="text-gray-400 leading-relaxed font-light text-lg">{f.desc}</p>
-                <div className="mt-8 flex items-center gap-2 text-emerald-500 text-[10px] font-black uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all translate-y-2 group-hover:translate-y-0">
-                  Read Protocol <ArrowRight size={14} />
+                <h4 className="text-3xl font-black mb-6 text-white tracking-tight uppercase leading-none">{f.title}</h4>
+                <p className="text-gray-400 leading-relaxed font-light text-lg mb-8">{f.desc}</p>
+                <div className="flex items-center gap-2 text-emerald-500 text-[10px] font-black uppercase tracking-[0.3em] opacity-0 group-hover:opacity-100 transition-all translate-y-2 group-hover:translate-y-0">
+                  Access Specs <ArrowRight size={14} />
                 </div>
               </div>
             </div>
@@ -369,48 +378,48 @@ const Hero: React.FC<{ onOpenModal: () => void }> = ({ onOpenModal }) => {
       <div className="scanline" />
       
       <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-20 items-center relative z-20">
-        <div className="space-y-12 animate-in fade-in slide-in-from-bottom-8 duration-1000">
-          <div className="inline-flex items-center gap-4 px-6 py-2 rounded-full glass-panel border border-emerald-500/20 text-emerald-400 text-[10px] font-black tracking-[0.4em] uppercase shadow-[0_0_20px_rgba(16,185,129,0.1)]">
-            <Activity size={16} className="animate-pulse" /> Status: DESIGN_PARTNER_PROGRAM
+        <div className="space-y-12 animate-in fade-in slide-in-from-bottom-12 duration-1000">
+          <div className="inline-flex items-center gap-4 px-6 py-2 rounded-full glass-panel border border-emerald-500/20 text-emerald-400 text-[10px] font-black tracking-[0.5em] uppercase shadow-[0_0_30px_rgba(16,185,129,0.1)]">
+            <div className="w-2 h-2 bg-emerald-500 rounded-full animate-ping" /> Security Channel: SECURED
           </div>
-          <h1 className="text-8xl md:text-[10rem] font-black leading-[0.8] tracking-[-0.06em] text-white">
+          <h1 className="text-8xl md:text-[11rem] font-black leading-[0.75] tracking-[-0.06em] text-white">
             Tame the <br /><span className="text-emerald-500 italic">Swarm.</span>
           </h1>
-          <p className="text-2xl md:text-3xl text-gray-400 max-w-xl leading-snug font-light">
-            Defining the security layer for the AI-native enterprise. <span className="redacted" title="Proprietary info">Unbox the black box.</span>
+          <p className="text-2xl md:text-3xl text-gray-400 max-w-xl leading-tight font-light">
+            Providing the missing security layer for the GenAI-native enterprise. <span className="redacted" title="Proprietary Intercept Engine: Patent Pending">Revealing the black box.</span>
           </p>
           <div className="flex flex-col sm:flex-row gap-8 pt-6">
             <button 
               onClick={onOpenModal} 
-              className="group px-14 py-8 bg-emerald-500 hover:bg-emerald-400 text-swarm-dark rounded-[2.5rem] font-black text-2xl transition-all shadow-[0_0_50px_rgba(16,185,129,0.4)] flex items-center justify-center gap-4 active:scale-95 hover:translate-x-2"
+              className="group px-14 py-8 bg-emerald-500 hover:bg-emerald-400 text-swarm-dark rounded-[2.5rem] font-black text-2xl transition-all shadow-[0_0_60px_rgba(16,185,129,0.4)] flex items-center justify-center gap-4 active:scale-95 hover:translate-x-2"
             >
-              REQUEST ACCESS <ChevronRight strokeWidth={4} className="group-hover:translate-x-2 transition-transform" />
+              Request Clearance <ChevronRight strokeWidth={4} className="group-hover:translate-x-2 transition-transform" />
             </button>
           </div>
         </div>
 
         <div className="relative flex justify-center items-center group perspective-1000">
-          <div className="w-full max-w-[600px] aspect-square relative">
-            <div className="absolute inset-0 bg-emerald-500/10 blur-[180px] rounded-full animate-pulse" />
-            <div className="w-full h-full bg-swarm-terminal rounded-[6rem] border border-white/10 terminal-glow animate-float flex items-center justify-center overflow-hidden relative shadow-2xl transform group-hover:scale-105 transition-transform duration-1000">
+          <div className="w-full max-w-[650px] aspect-square relative">
+            <div className="absolute inset-0 bg-emerald-500/10 blur-[200px] rounded-full animate-pulse" />
+            <div className="w-full h-full bg-swarm-terminal rounded-[6rem] border border-white/10 terminal-glow animate-float flex items-center justify-center overflow-hidden relative shadow-3xl transform transition-transform duration-[3s] group-hover:scale-105">
                <div className="absolute inset-0 opacity-10 pointer-events-none">
-                  <div className="grid grid-cols-10 h-full w-full">
-                    {[...Array(100)].map((_, i) => (
+                  <div className="grid grid-cols-12 h-full w-full">
+                    {[...Array(144)].map((_, i) => (
                       <div key={i} className="border-[0.5px] border-emerald-500/10" />
                     ))}
                   </div>
                </div>
-               <div className="relative z-10 scale-125 group-hover:scale-150 transition-transform duration-[2s] ease-out">
-                  <SwarmLogo size={280} className="text-emerald-500" />
+               <div className="relative z-10 scale-125 group-hover:scale-150 transition-transform duration-[4s] ease-out-quint">
+                  <SwarmLogo size={320} className="text-emerald-500" />
                </div>
-               <div className="absolute bottom-12 left-12 right-12 flex justify-between items-end">
-                  <div className="space-y-2 opacity-60 font-mono text-[9px] uppercase tracking-tighter text-emerald-500 font-bold">
-                    <p className="flex items-center gap-2"><div className="w-1 h-1 rounded-full bg-emerald-500 animate-ping" /> CORE_SYNC: ESTABLISHED</p>
-                    <p className="text-gray-500">THREAT_BUFFER: NOMINAL</p>
-                    <p className="text-gray-500">ACTIVE_NODES: 12</p>
+               <div className="absolute bottom-16 left-16 right-16 flex justify-between items-end">
+                  <div className="space-y-3 opacity-60 font-mono text-[10px] uppercase tracking-tighter text-emerald-500 font-bold">
+                    <p className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" /> SYNC_STATE: STABLE</p>
+                    <p className="text-gray-500">CLEARANCE_REQD: LEVEL_4</p>
+                    <p className="text-gray-500">VERSION: 0.9.2-BETA</p>
                   </div>
-                  <div className="w-16 h-16 glass-panel rounded-full flex items-center justify-center border border-emerald-500/20 shadow-[0_0_20px_rgba(16,185,129,0.3)]">
-                    <Lock size={20} className="text-emerald-500" />
+                  <div className="w-20 h-20 glass-panel rounded-full flex items-center justify-center border border-emerald-500/20 shadow-[0_0_40px_rgba(16,185,129,0.3)] group-hover:rotate-[360deg] transition-all duration-[2s]">
+                    <Lock size={24} className="text-emerald-500" />
                   </div>
                </div>
             </div>
@@ -425,9 +434,8 @@ const App: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
-    // Add console 'tease'
-    console.log("%cSwarm Security %c[CLASSIFIED]", "color: #10b981; font-size: 20px; font-weight: bold;", "color: #666; font-size: 14px;");
-    console.log("Transmission node initialized. Listening for secure handshakes...");
+    console.log("%cSWARM SECURITY %cSYSTEM_READY", "color: #10b981; font-weight: bold; font-size: 16px;", "background: #10b981; color: #000; padding: 2px 4px; border-radius: 2px; font-weight: bold;");
+    console.log("Handshake Node: send-email.guy-b12.workers.dev initialized.");
   }, []);
 
   return (
@@ -440,33 +448,33 @@ const App: React.FC = () => {
       
       <FeaturesGrid />
       
-      <section className="py-48 border-t border-white/5 bg-gradient-to-b from-transparent to-emerald-500/5 text-center relative overflow-hidden">
-        <div className="absolute inset-0 opacity-5 pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
+      <section className="py-48 border-t border-white/5 bg-gradient-to-b from-transparent to-emerald-500/10 text-center relative overflow-hidden">
+        <div className="absolute inset-0 opacity-10 pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
         <div className="max-w-5xl mx-auto px-6 relative z-10">
-           <div className="inline-block p-10 bg-emerald-500/5 border border-emerald-500/20 rounded-[4rem] mb-16 shadow-2xl backdrop-blur-3xl animate-float">
-             <SwarmLogo size={100} className="text-emerald-500" />
+           <div className="inline-block p-12 bg-emerald-500/5 border border-emerald-500/20 rounded-[4.5rem] mb-20 shadow-4xl backdrop-blur-3xl animate-float">
+             <SwarmLogo size={120} className="text-emerald-500" />
            </div>
-           <h2 className="text-6xl md:text-[8rem] font-black mb-12 tracking-tighter leading-[0.85] text-white uppercase">Tame the Swarm. <br /><span className="text-emerald-500">Before it tames you.</span></h2>
-           <p className="text-xl text-gray-500 mb-20 max-w-2xl mx-auto font-light leading-relaxed uppercase tracking-[0.1em]">Exclusive design partnerships are now opening for selected enterprise innovators.</p>
+           <h2 className="text-6xl md:text-[9rem] font-black mb-12 tracking-tighter leading-[0.8] text-white uppercase">Tame the Swarm. <br /><span className="text-emerald-500 italic">Secure the AI.</span></h2>
+           <p className="text-xl text-gray-500 mb-20 max-w-2xl mx-auto font-light leading-relaxed uppercase tracking-[0.2em]">Exclusive design partnerships for enterprise innovators now opening clearance slots.</p>
            <button 
              onClick={() => setIsModalOpen(true)} 
-             className="px-24 py-10 bg-emerald-500 text-swarm-dark rounded-[2.5rem] font-black text-4xl hover:scale-105 transition-all shadow-[0_0_100px_rgba(16,185,129,0.5)] active:scale-95 uppercase tracking-tighter"
+             className="px-24 py-10 bg-emerald-500 text-swarm-dark rounded-[3rem] font-black text-4xl hover:scale-105 transition-all shadow-[0_0_120px_rgba(16,185,129,0.5)] active:scale-95 uppercase tracking-tighter"
            >
-            RESERVE ACCESS
+            Reserve Slot
            </button>
         </div>
       </section>
 
-      <footer className="py-32 border-t border-white/5 opacity-40 grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-1000">
+      <footer className="py-32 border-t border-white/5 opacity-50 grayscale hover:grayscale-0 transition-all duration-1000">
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-16">
-          <div className="flex items-center gap-6 group cursor-pointer" onClick={() => window.scrollTo(0, 0)}>
+          <div className="flex items-center gap-6 group cursor-pointer" onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})}>
             <SwarmLogo size={32} className="text-emerald-500" />
             <span className="font-black text-xl tracking-tighter uppercase text-white">Swarm Security</span>
           </div>
-          <div className="flex flex-wrap justify-center gap-12 text-[11px] uppercase font-bold tracking-[0.3em] text-gray-400 font-mono">
+          <div className="flex flex-wrap justify-center gap-12 text-[10px] uppercase font-bold tracking-[0.4em] text-gray-400 font-mono">
             <a href="#" className="hover:text-emerald-500 transition-colors">Privacy_Protocol</a>
-            <a href="#" className="hover:text-emerald-500 transition-colors">Compliance_Log</a>
-            <span className="text-gray-700">© 2024 CLASSIFIED_SYSTEM</span>
+            <a href="#" className="hover:text-emerald-500 transition-colors">Handshake_Specs</a>
+            <span className="text-gray-800">© 2024 SECURE_ENDPOINT_ALPHA</span>
           </div>
         </div>
       </footer>
