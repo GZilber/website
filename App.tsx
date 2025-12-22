@@ -21,7 +21,7 @@ import {
 
 /**
  * INQUIRY SERVICE
- * Specifically aligned with the Cloudflare Worker provided:
+ * Specifically aligned with the Cloudflare Worker: send-email.guy-b12.workers.dev
  * Expects: { name: string, email: string, message: string }
  */
 const InquiryService = {
@@ -31,13 +31,15 @@ const InquiryService = {
         name: `${data.firstName} ${data.lastName}`,
         email: data.email,
         message: `Inquiry from ${data.company}. 
-        Requester: ${data.firstName} ${data.lastName}
-        Email: ${data.email}
-        Subject: Access to Swarm Security Platform.`
+Requester: ${data.firstName} ${data.lastName}
+Email: ${data.email}
+Subject: Access Request to Swarm Security Platform.`
       };
 
-      // Ensure your Worker is deployed to this path or update to your full Workers URL
-      const response = await fetch('/api/send-email', { 
+      // Using the specific Worker URL provided
+      const WORKER_URL = 'https://send-email.guy-b12.workers.dev';
+
+      const response = await fetch(WORKER_URL, { 
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -46,20 +48,15 @@ const InquiryService = {
       });
       
       if (response.ok) {
+        // The worker returns "Sent!" on success
         const text = await response.text();
-        return text === 'Sent!';
+        return text.includes('Sent');
       }
       
-      // Fallback/Simulated success for local development if endpoint doesn't exist
-      if (window.location.hostname === 'localhost') {
-        console.warn("Worker endpoint not found. Simulating successful transmission for demo.");
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        return true;
-      }
-
       return false;
     } catch (err) {
       console.error("Transmission error:", err);
+      // Fail explicitly so the UI can show the error state
       return false; 
     }
   }
@@ -112,8 +109,11 @@ const AccessModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpe
     setStatus('sending');
 
     const success = await InquiryService.submit(formData);
-    if (success) setStatus('success');
-    else setStatus('error');
+    if (success) {
+      setStatus('success');
+    } else {
+      setStatus('error');
+    }
   };
 
   return (
@@ -122,18 +122,18 @@ const AccessModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpe
       
       <div className="relative bg-[#0c0c11] w-full max-w-lg rounded-[2.5rem] border border-white/10 shadow-[0_0_80px_rgba(16,185,129,0.1)] overflow-hidden p-8 md:p-12 animate-in zoom-in-95 duration-500">
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-emerald-500 to-transparent shadow-[0_0_15px_rgba(16,185,129,0.5)]" />
-        <button onClick={onClose} className="absolute top-8 right-8 text-gray-500 hover:text-white transition-colors"><X size={24} /></button>
+        <button onClick={onClose} className="absolute top-8 right-8 text-gray-400 hover:text-white transition-colors"><X size={24} /></button>
 
         {status === 'success' ? (
           <div className="text-center py-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
             <div className="w-24 h-24 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-8 border border-emerald-500/20 shadow-[0_0_30px_rgba(16,185,129,0.1)]">
               <CheckCircle2 size={48} className="text-emerald-500" />
             </div>
-            <h3 className="text-3xl font-black mb-4 tracking-tighter uppercase text-white">Encrypted & Sent</h3>
+            <h3 className="text-3xl font-black mb-4 tracking-tighter uppercase text-white">Transmission Sent</h3>
             <p className="text-gray-400 text-sm leading-relaxed max-w-xs mx-auto font-mono text-[11px] uppercase tracking-wider">
               Bypassing_Public_Channels: SUCCESS<br/>
-              Cloudflare_Worker_Node: REACHED<br/>
-              Status: SECURE_QUEUE
+              Worker_Endpoint: VERIFIED<br/>
+              Status: DELIVERED
             </p>
             <button onClick={onClose} className="mt-10 px-10 py-4 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-all font-black text-xs uppercase tracking-[0.2em] text-white">Close Terminal</button>
           </div>
@@ -156,7 +156,7 @@ const AccessModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpe
                 <input type="text" name="firstName" placeholder="First Name" required value={formData.firstName} onChange={handleInputChange} className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl outline-none focus:border-emerald-500/50 transition-all font-mono text-sm text-white placeholder:text-gray-600" />
                 <input type="text" name="lastName" placeholder="Last Name" required value={formData.lastName} onChange={handleInputChange} className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl outline-none focus:border-emerald-500/50 transition-all font-mono text-sm text-white placeholder:text-gray-600" />
               </div>
-              <input type="email" name="email" placeholder="Corporate Email (e.g. name@company.com)" required value={formData.email} onChange={handleInputChange} className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl outline-none focus:border-emerald-500/50 transition-all font-mono text-sm text-white placeholder:text-gray-600" />
+              <input type="email" name="email" placeholder="Corporate Email" required value={formData.email} onChange={handleInputChange} className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl outline-none focus:border-emerald-500/50 transition-all font-mono text-sm text-white placeholder:text-gray-600" />
               <input type="text" name="company" placeholder="Organization Identity" required value={formData.company} onChange={handleInputChange} className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl outline-none focus:border-emerald-500/50 transition-all font-mono text-sm text-white placeholder:text-gray-600" />
               
               <div className="pt-4">
@@ -167,8 +167,12 @@ const AccessModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpe
               </div>
 
               {status === 'error' && (
-                <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-400 text-[10px] font-mono flex items-center gap-3">
-                  <AlertTriangle size={16} /> ERROR: TRANSMISSION_FAILED. Retry or contact info@swarm-security.com
+                <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-400 text-[10px] font-mono flex items-center gap-3 animate-in fade-in slide-in-from-top-2">
+                  <AlertTriangle size={16} /> 
+                  <div className="flex flex-col">
+                    <span className="font-bold">TRANSMISSION_FAILED</span>
+                    <span>Verify your connection and retry.</span>
+                  </div>
                 </div>
               )}
 
