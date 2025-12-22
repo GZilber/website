@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { 
   Shield, 
@@ -116,20 +115,38 @@ Sent from Swarm Security Portal
     try {
       let emailClient = (window as any).Email;
       
+      // Attempt to load the script only when needed, with a timeout to catch connection resets
       if (!emailClient) {
-        // Last ditch attempt to load it
-        await new Promise((resolve) => {
-          const script = document.createElement('script');
-          script.src = "https://smtpjs.com/v3/smtp.js";
-          script.onload = resolve;
-          script.onerror = resolve;
-          document.head.appendChild(script);
-        });
-        emailClient = (window as any).Email;
+        try {
+          await new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = "https://smtpjs.com/v3/smtp.js";
+            script.crossOrigin = "anonymous";
+            
+            const timeout = setTimeout(() => {
+              script.remove();
+              reject(new Error("Timeout loading script"));
+            }, 5000); // 5s timeout for the external script
+
+            script.onload = () => {
+              clearTimeout(timeout);
+              resolve(true);
+            };
+            script.onerror = () => {
+              clearTimeout(timeout);
+              reject(new Error("Connection reset or blocked"));
+            };
+            document.head.appendChild(script);
+          });
+          emailClient = (window as any).Email;
+        } catch (loadError) {
+          console.warn("External script reset or blocked by firewall:", loadError);
+          setStatus('blocked');
+          return;
+        }
       }
       
       if (!emailClient) {
-        // Intentionally switch to blocked state rather than throwing generic error
         setStatus('blocked');
         return;
       }
@@ -215,7 +232,7 @@ Sent from Swarm Security Portal
               </div>
               <h3 className="text-2xl font-bold mb-3">Security Protocol Active</h3>
               <p className="text-gray-400 text-sm mb-8 leading-relaxed max-w-sm mx-auto">
-                An automated script blocker was detected. No problem—please use your local email app to finalize your request. We've pre-filled everything for you.
+                A script connection was reset or blocked by your environment. No problem—please finalize your request via your local email app. We've pre-filled everything.
               </p>
               
               <div className="space-y-3">
