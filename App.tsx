@@ -24,7 +24,7 @@ import {
 
 /**
  * INQUIRY SERVICE
- * Strictly aligned with the Cloudflare Worker at: send-email.guy-b12.workers.dev
+ * Specifically aligned with the Cloudflare Worker at: send-email.guy-b12.workers.dev
  * Expects: { name: string, email: string, message: string }
  */
 const InquiryService = {
@@ -216,7 +216,9 @@ const AccessModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpe
                 )}
               </button>
             </form>
-            <p className="mt-8 text-[8px] text-gray-700 font-mono uppercase tracking-widest text-center italic">Handshake Route: cloudflare_worker >> resend_node >> secure_smtp_bypass</p>
+            <p className="mt-8 text-[8px] text-gray-700 font-mono uppercase tracking-widest text-center italic">
+              Handshake Route: cloudflare_worker &raquo; resend_node &raquo; secure_smtp_bypass
+            </p>
           </>
         )}
       </div>
