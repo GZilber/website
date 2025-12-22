@@ -11,18 +11,21 @@ import {
   AlertTriangle, 
   Cpu, 
   Monitor, 
-  Globe, 
   Loader2, 
   CheckCircle2,
-  Mail
+  Mail,
+  Copy,
+  ExternalLink
 } from 'lucide-react';
 
 // --- Security Configuration ---
 const SMTP_CONFIG = {
   Host: "smtp.gmail.com",
   Username: "info@swarm-security.com",
-  Password: "txjctqwiefcabamv" // App Password provided by user
+  Password: "txjctqwiefcabamv" 
 };
+
+const CONTACT_EMAILS = "roy@swarm-security.com, guy@swarm-security.com";
 
 // --- Components ---
 
@@ -57,6 +60,8 @@ const SwarmLogo: React.FC<{ size?: number; className?: string }> = ({ size = 32,
   </svg>
 );
 
+const RequiredStar = () => <span className="text-emerald-500 ml-1">*</span>;
+
 const AccessModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen, onClose }) => {
   const [formData, setFormData] = useState({
     firstName: '',
@@ -69,23 +74,13 @@ const AccessModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpe
     agreed: false
   });
   
-  const [status, setStatus] = useState<'idle' | 'sending' | 'success' | 'error' | 'blocked'>('idle');
-
-  // Attempt to load SmtpJS if it's missing (helps bypass some lazy-load blocks)
-  useEffect(() => {
-    if (isOpen && !(window as any).Email) {
-      const script = document.createElement('script');
-      script.src = `https://smtpjs.com/v3/smtp.js?t=${Date.now()}`;
-      script.async = true;
-      script.onerror = () => setStatus('blocked');
-      document.body.appendChild(script);
-    }
-  }, [isOpen]);
+  const [status, setStatus] = useState<'idle' | 'sending' | 'success' | 'blocked' | 'error'>('idle');
+  const [copyFeedback, setCopyFeedback] = useState(false);
 
   if (!isOpen) return null;
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value, type } = e.target;
+    const { name, value, type } = e.target as HTMLInputElement;
     const val = type === 'checkbox' ? (e.target as HTMLInputElement).checked : value;
     setFormData(prev => ({ ...prev, [name]: val }));
   };
@@ -93,21 +88,52 @@ const AccessModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpe
   const getManualMailto = () => {
     const subject = encodeURIComponent(`Early Access Request: ${formData.company} - ${formData.firstName}`);
     const body = encodeURIComponent(`
+REQUEST DETAILS
+---------------
 Name: ${formData.firstName} ${formData.lastName}
 Email: ${formData.email}
 Company: ${formData.company}
-Job Title: ${formData.jobTitle}
+Job Title: ${formData.jobTitle || 'N/A'}
 Country: ${formData.country}
-Referral: ${formData.referral}
+Referral: ${formData.referral || 'N/A'}
+
+Sent from Swarm Security Portal
     `.trim());
-    return `mailto:roy@swarm-security.com,guy@swarm-security.com?subject=${subject}&body=${body}`;
+    return `mailto:${CONTACT_EMAILS}?subject=${subject}&body=${body}`;
+  };
+
+  const handleCopyEmail = () => {
+    navigator.clipboard.writeText(CONTACT_EMAILS);
+    setCopyFeedback(true);
+    setTimeout(() => setCopyFeedback(false), 2000);
   };
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!formData.agreed) return;
     setStatus('sending');
 
     try {
+      let emailClient = (window as any).Email;
+      
+      if (!emailClient) {
+        // Last ditch attempt to load it
+        await new Promise((resolve) => {
+          const script = document.createElement('script');
+          script.src = "https://smtpjs.com/v3/smtp.js";
+          script.onload = resolve;
+          script.onerror = resolve;
+          document.head.appendChild(script);
+        });
+        emailClient = (window as any).Email;
+      }
+      
+      if (!emailClient) {
+        // Intentionally switch to blocked state rather than throwing generic error
+        setStatus('blocked');
+        return;
+      }
+
       const emailBody = `
         <div style="font-family: sans-serif; color: #333; max-width: 600px; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
           <h2 style="color: #10b981;">New Swarm Security Lead</h2>
@@ -122,26 +148,11 @@ Referral: ${formData.referral}
         </div>
       `;
 
-      let emailClient = (window as any).Email;
-      let retries = 0;
-      
-      // Retry loop for slow connections or script delays
-      while (!emailClient && retries < 15) {
-        await new Promise(r => setTimeout(r, 200));
-        emailClient = (window as any).Email;
-        retries++;
-      }
-      
-      if (!emailClient) {
-        setStatus('blocked');
-        return;
-      }
-
       const result = await emailClient.send({
         Host: SMTP_CONFIG.Host,
         Username: SMTP_CONFIG.Username,
         Password: SMTP_CONFIG.Password,
-        To: "roy@swarm-security.com, guy@swarm-security.com",
+        To: CONTACT_EMAILS,
         From: SMTP_CONFIG.Username,
         Subject: `Early Access Request: ${formData.company} - ${formData.firstName}`,
         Body: emailBody
@@ -150,14 +161,15 @@ Referral: ${formData.referral}
       if (result === 'OK' || result === 'ok') {
         setStatus('success');
       } else {
-        console.error("SMTP Error:", result);
-        setStatus('error');
+        throw new Error(result);
       }
     } catch (err: any) {
-      console.error("Email send error:", err);
-      setStatus('blocked');
+      console.error("Submission error:", err);
+      setStatus('error');
     }
   };
+
+  const isSubmitDisabled = status === 'sending' || !formData.agreed;
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center px-4">
@@ -185,7 +197,7 @@ Referral: ${formData.referral}
               </div>
               <h3 className="text-3xl font-bold mb-4">Request Received</h3>
               <p className="text-gray-400 max-w-sm mx-auto leading-relaxed">
-                Thank you, <span className="text-white font-semibold">{formData.firstName}</span>. Our team has been notified.
+                Thank you, <span className="text-white font-semibold">{formData.firstName}</span>. Our team has been notified and we'll be in touch shortly.
               </p>
               <button 
                 onClick={onClose}
@@ -195,30 +207,41 @@ Referral: ${formData.referral}
               </button>
             </div>
           ) : status === 'blocked' ? (
-            <div className="text-center animate-in fade-in slide-in-from-bottom-4 duration-500 py-10">
+            <div className="text-center animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="flex justify-center mb-6">
-                 <div className="p-4 bg-amber-500/10 rounded-full">
-                    <AlertTriangle size={40} className="text-amber-500" />
-                 </div>
+                <div className="w-16 h-16 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex items-center justify-center">
+                  <Shield className="text-amber-500" size={32} />
+                </div>
               </div>
-              <h3 className="text-2xl font-bold mb-3">Browser Block Detected</h3>
-              <p className="text-gray-400 text-sm mb-8 leading-relaxed">
-                Your ad-blocker or browser settings are preventing automated submission. 
-                Please use the direct link below to send your request.
+              <h3 className="text-2xl font-bold mb-3">Security Protocol Active</h3>
+              <p className="text-gray-400 text-sm mb-8 leading-relaxed max-w-sm mx-auto">
+                An automated script blocker was detected. No problem—please use your local email app to finalize your request. We've pre-filled everything for you.
               </p>
-              <a 
-                href={getManualMailto()}
-                className="inline-flex items-center gap-3 bg-white text-[#050b1a] px-10 py-4 rounded-xl font-bold text-lg hover:bg-gray-200 transition-all shadow-xl active:scale-95"
-              >
-                <Mail size={20} />
-                Send Request Manually
-              </a>
-              <button 
-                onClick={() => setStatus('idle')}
-                className="block w-full mt-6 text-gray-500 text-xs hover:text-white underline"
-              >
-                Try automated sending again
-              </button>
+              
+              <div className="space-y-3">
+                <a 
+                  href={getManualMailto()}
+                  className="w-full flex items-center justify-center gap-3 bg-emerald-500 hover:bg-emerald-400 text-[#050b1a] py-4 rounded-xl font-bold text-base transition-all shadow-xl shadow-emerald-500/20 active:scale-[0.98]"
+                >
+                  <Mail size={20} /> Complete via Email App
+                </a>
+                
+                <div className="grid grid-cols-2 gap-3">
+                  <button 
+                    onClick={handleCopyEmail}
+                    className="flex items-center justify-center gap-2 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-xs font-semibold transition-all"
+                  >
+                    {copyFeedback ? <CheckCircle2 size={14} className="text-emerald-500" /> : <Copy size={14} />}
+                    {copyFeedback ? "Copied!" : "Copy Address"}
+                  </button>
+                  <button 
+                    onClick={() => setStatus('idle')}
+                    className="flex items-center justify-center gap-2 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-xs font-semibold transition-all"
+                  >
+                    <X size={14} /> Back to Form
+                  </button>
+                </div>
+              </div>
             </div>
           ) : (
             <>
@@ -230,64 +253,78 @@ Referral: ${formData.referral}
                 </div>
                 <h3 className="text-2xl font-bold tracking-tight">Secure Early Access</h3>
                 <p className="text-sm text-gray-400 mt-2">Join the elite organizations securing their GenAI future.</p>
+                <p className="text-[10px] text-gray-500 mt-1 uppercase tracking-wider">Fields marked with <RequiredStar /> are mandatory</p>
               </div>
 
               <form className="space-y-4" onSubmit={handleFormSubmit}>
                 <div className="grid grid-cols-2 gap-4">
-                  <input 
-                    type="text" 
-                    name="firstName"
-                    placeholder="First name" 
-                    required
-                    disabled={status === 'sending'}
-                    value={formData.firstName}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 bg-[#14141d] border border-white/5 focus:border-emerald-500/50 rounded-xl text-sm outline-none transition-all text-white placeholder-gray-600 disabled:opacity-50"
-                  />
-                  <input 
-                    type="text" 
-                    name="lastName"
-                    placeholder="Last name" 
-                    required
-                    disabled={status === 'sending'}
-                    value={formData.lastName}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 bg-[#14141d] border border-white/5 focus:border-emerald-500/50 rounded-xl text-sm outline-none transition-all text-white placeholder-gray-600 disabled:opacity-50"
-                  />
+                  <div className="relative">
+                    <input 
+                      type="text" 
+                      name="firstName"
+                      placeholder="First name" 
+                      required
+                      disabled={status === 'sending'}
+                      value={formData.firstName}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-3 bg-[#14141d] border border-white/5 focus:border-emerald-500/50 rounded-xl text-sm outline-none transition-all text-white placeholder-gray-600 disabled:opacity-50"
+                    />
+                    <div className="absolute right-3 top-3 pointer-events-none"><RequiredStar /></div>
+                  </div>
+                  <div className="relative">
+                    <input 
+                      type="text" 
+                      name="lastName"
+                      placeholder="Last name" 
+                      required
+                      disabled={status === 'sending'}
+                      value={formData.lastName}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-3 bg-[#14141d] border border-white/5 focus:border-emerald-500/50 rounded-xl text-sm outline-none transition-all text-white placeholder-gray-600 disabled:opacity-50"
+                    />
+                    <div className="absolute right-3 top-3 pointer-events-none"><RequiredStar /></div>
+                  </div>
                 </div>
 
-                <input 
-                  type="email" 
-                  name="email"
-                  placeholder="Email address" 
-                  required
-                  disabled={status === 'sending'}
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 bg-[#14141d] border border-white/5 focus:border-emerald-500/50 rounded-xl text-sm outline-none transition-all text-white placeholder-gray-600 disabled:opacity-50"
-                />
+                <div className="relative">
+                  <input 
+                    type="email" 
+                    name="email"
+                    placeholder="Email address" 
+                    required
+                    disabled={status === 'sending'}
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 bg-[#14141d] border border-white/5 focus:border-emerald-500/50 rounded-xl text-sm outline-none transition-all text-white placeholder-gray-600 disabled:opacity-50"
+                  />
+                  <div className="absolute right-3 top-3 pointer-events-none"><RequiredStar /></div>
+                </div>
 
                 <div className="grid grid-cols-2 gap-4">
-                  <input 
-                    type="text" 
-                    name="company"
-                    placeholder="Company name" 
-                    required
-                    disabled={status === 'sending'}
-                    value={formData.company}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 bg-[#14141d] border border-white/5 focus:border-emerald-500/50 rounded-xl text-sm outline-none transition-all text-white placeholder-gray-600 disabled:opacity-50"
-                  />
-                  <input 
-                    type="text" 
-                    name="jobTitle"
-                    placeholder="Job title" 
-                    required
-                    disabled={status === 'sending'}
-                    value={formData.jobTitle}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 bg-[#14141d] border border-white/5 focus:border-emerald-500/50 rounded-xl text-sm outline-none transition-all text-white placeholder-gray-600 disabled:opacity-50"
-                  />
+                  <div className="relative">
+                    <input 
+                      type="text" 
+                      name="company"
+                      placeholder="Company name" 
+                      required
+                      disabled={status === 'sending'}
+                      value={formData.company}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-3 bg-[#14141d] border border-white/5 focus:border-emerald-500/50 rounded-xl text-sm outline-none transition-all text-white placeholder-gray-600 disabled:opacity-50"
+                    />
+                    <div className="absolute right-3 top-3 pointer-events-none"><RequiredStar /></div>
+                  </div>
+                  <div className="relative">
+                    <input 
+                      type="text" 
+                      name="jobTitle"
+                      placeholder="Job title (Optional)" 
+                      disabled={status === 'sending'}
+                      value={formData.jobTitle}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-3 bg-[#14141d] border border-white/5 focus:border-emerald-500/50 rounded-xl text-sm outline-none transition-all text-white placeholder-gray-600 disabled:opacity-50"
+                    />
+                  </div>
                 </div>
 
                 <div className="relative">
@@ -308,13 +345,14 @@ Referral: ${formData.referral}
                     <option value="CA">Canada</option>
                     <option value="SG">Singapore</option>
                   </select>
+                  <div className="absolute right-8 top-3 pointer-events-none"><RequiredStar /></div>
                   <ChevronRight className="absolute right-4 top-1/2 -translate-y-1/2 rotate-90 text-gray-600 pointer-events-none" size={16} />
                 </div>
 
                 <input 
                   type="text" 
                   name="referral"
-                  placeholder="How did you hear about Swarm?" 
+                  placeholder="How did you hear about Swarm? (Optional)" 
                   disabled={status === 'sending'}
                   value={formData.referral}
                   onChange={handleInputChange}
@@ -326,33 +364,56 @@ Referral: ${formData.referral}
                     <input 
                       type="checkbox" 
                       name="agreed"
+                      required
                       disabled={status === 'sending'}
                       checked={formData.agreed}
                       onChange={handleInputChange}
-                      className="mt-1 accent-emerald-500" 
+                      className="mt-1 accent-emerald-500 h-4 w-4 rounded border-white/10 bg-[#14141d]" 
                     />
-                    <span className="text-[12px] text-gray-400 group-hover:text-gray-300 transition-colors">I agree to receive communications from Swarm Security.</span>
+                    <span className="text-[12px] text-gray-400 group-hover:text-gray-300 transition-colors">
+                      I agree to receive communications from Swarm Security. <RequiredStar />
+                    </span>
                   </label>
                 </div>
 
                 {status === 'error' && (
-                  <p className="text-red-400 text-xs text-center mt-2">Failed to send automated request. Please try again or refresh.</p>
+                  <div className="bg-red-500/10 border border-red-500/20 p-4 rounded-xl text-center space-y-3 animate-in slide-in-from-top-2 duration-300">
+                    <p className="text-red-400 text-[10px] leading-tight">
+                      A network error occurred. Please try sending via your email app instead.
+                    </p>
+                    <button 
+                      type="button"
+                      onClick={() => setStatus('blocked')}
+                      className="text-xs text-white font-bold bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg transition-all"
+                    >
+                      Use Email App Fallback
+                    </button>
+                  </div>
                 )}
 
                 <button 
                   type="submit"
-                  disabled={status === 'sending'}
-                  className="w-full bg-emerald-500 hover:bg-emerald-400 text-[#050b1a] py-4 rounded-xl font-bold text-base transition-all shadow-xl shadow-emerald-500/10 mt-4 active:scale-[0.98] disabled:opacity-80 flex items-center justify-center gap-3"
+                  disabled={isSubmitDisabled}
+                  className={`w-full py-4 rounded-xl font-bold text-base transition-all shadow-xl mt-4 active:scale-[0.98] flex items-center justify-center gap-3 
+                    ${isSubmitDisabled 
+                      ? 'bg-emerald-500/20 text-emerald-500/40 cursor-not-allowed shadow-none border border-emerald-500/10' 
+                      : 'bg-emerald-500 hover:bg-emerald-400 text-[#050b1a] shadow-emerald-500/10'
+                    }`}
                 >
                   {status === 'sending' ? (
                     <>
                       <Loader2 className="animate-spin" size={20} />
-                      Sending...
+                      Negotiating Access...
                     </>
                   ) : (
                     "Contact Now"
                   )}
                 </button>
+                {!formData.agreed && status === 'idle' && (
+                  <p className="text-[10px] text-gray-600 text-center italic">
+                    Please agree to the communications check to continue.
+                  </p>
+                )}
               </form>
             </>
           )}
