@@ -302,33 +302,81 @@ const PlatformPage: React.FC = () => (
         <p className="text-xl text-slate-400 font-medium">Built on a sub-10ms high-performance proxy layer.</p>
       </div>
 
-      <div className="space-y-24 mb-40">
+      <div className="space-y-32 mb-40">
         <div id="asset-inventory" className="grid lg:grid-cols-2 gap-16 items-center">
            <div className="space-y-8">
               <div className="flex items-center gap-4">
                  <div className="p-3 bg-swarm-emerald/10 rounded-xl text-swarm-emerald"><Database size={32} /></div>
                  <h3 className="text-3xl font-bold">Asset Inventory</h3>
               </div>
-              <p className="text-lg text-slate-400 leading-relaxed font-medium">Automated discovery indexes every LLM endpoint and connected data source.</p>
+              <p className="text-lg text-slate-400 leading-relaxed font-medium">Automated discovery indexes every LLM endpoint and connected data source across your organization's entire AI stack.</p>
            </div>
            <div className="glass p-12 rounded-[3rem] border-white/5 flex items-center justify-center bg-black/40 shadow-2xl">
               <div className="w-full space-y-4 font-mono text-xs">
                  <div className="flex justify-between border-b border-white/5 pb-2 text-slate-500"><span>ASSET_ID</span><span>TYPE</span><span>RISK</span></div>
                  <div className="flex justify-between py-1"><span className="text-white">dev-llama</span><span>LOCAL</span><span className="text-swarm-emerald">LOW</span></div>
                  <div className="flex justify-between py-1"><span className="text-white">openai-v4</span><span>CLOUD</span><span className="text-amber-500">MED</span></div>
+                 <div className="flex justify-between py-1"><span className="text-white">anthropic-claude</span><span>CLOUD</span><span className="text-swarm-emerald">LOW</span></div>
               </div>
            </div>
         </div>
+
         <div id="asset-graph" className="grid lg:grid-cols-2 gap-16 items-center">
            <div className="lg:order-2 space-y-8">
               <div className="flex items-center gap-4">
                  <div className="p-3 bg-swarm-emerald/10 rounded-xl text-swarm-emerald"><Network size={32} /></div>
                  <h3 className="text-3xl font-bold">Asset Graph</h3>
               </div>
-              <p className="text-lg text-slate-400 leading-relaxed font-medium">Visibility into the relationships between identities, agents, and data.</p>
+              <p className="text-lg text-slate-400 leading-relaxed font-medium">Visibility into the semantic relationships between identities, agents, and data. Map the flow of sensitive information in real-time.</p>
            </div>
            <div className="lg:order-1 glass rounded-[3rem] border-white/5 overflow-hidden shadow-2xl">
               <AssetGraphVisual />
+           </div>
+        </div>
+
+        <div id="policies" className="grid lg:grid-cols-2 gap-16 items-center">
+           <div className="space-y-8">
+              <div className="flex items-center gap-4">
+                 <div className="p-3 bg-swarm-emerald/10 rounded-xl text-swarm-emerald"><Settings size={32} /></div>
+                 <h3 className="text-3xl font-bold">Policies</h3>
+              </div>
+              <p className="text-lg text-slate-400 leading-relaxed font-medium">Define granular semantic policies. Automatically redact secrets, filter injections, and enforce behavioral constraints on every prompt.</p>
+           </div>
+           <div className="glass p-12 rounded-[3rem] border-white/5 bg-black/40 shadow-2xl">
+              <div className="space-y-4">
+                 <div className="p-4 rounded-xl bg-white/5 border border-white/10 flex justify-between items-center">
+                    <div className="flex items-center gap-3 font-medium text-sm text-white">
+                       <Lock className="text-swarm-emerald" size={16} /> global-secret-scrub
+                    </div>
+                    <div className="px-2 py-0.5 rounded bg-swarm-emerald/20 text-swarm-emerald text-[10px] font-black uppercase">ACTIVE</div>
+                 </div>
+                 <div className="p-4 rounded-xl bg-white/5 border border-white/10 flex justify-between items-center">
+                    <div className="flex items-center gap-3 font-medium text-sm text-white">
+                       <ShieldCheck className="text-swarm-emerald" size={16} /> injection-guard-v2
+                    </div>
+                    <div className="px-2 py-0.5 rounded bg-swarm-emerald/20 text-swarm-emerald text-[10px] font-black uppercase">ACTIVE</div>
+                 </div>
+              </div>
+           </div>
+        </div>
+
+        <div id="audit-log" className="grid lg:grid-cols-2 gap-16 items-center">
+           <div className="lg:order-2 space-y-8">
+              <div className="flex items-center gap-4">
+                 <div className="p-3 bg-swarm-emerald/10 rounded-xl text-swarm-emerald"><ClipboardList size={32} /></div>
+                 <h3 className="text-3xl font-bold">Audit Log</h3>
+              </div>
+              <p className="text-lg text-slate-400 leading-relaxed font-medium">An immutable, high-fidelity trail of every AI interaction. Record semantic context without compromising user privacy for GRC and forensics.</p>
+           </div>
+           <div className="lg:order-1 glass p-10 rounded-[3rem] border-white/5 bg-black/40 h-72 overflow-hidden flex flex-col justify-end shadow-2xl">
+              <div className="space-y-3 font-mono text-[10px] text-slate-400">
+                 <div>[2024-05-12 14:02:11] REQUEST_ID: 9821_AX -> APP_PROD -> STATUS: CLEAN</div>
+                 <div>[2024-05-12 14:02:15] REQUEST_ID: 9822_AX -> CLAUDE_EXT -> STATUS: REDACTED_PII</div>
+                 <div className="text-amber-500 font-bold">[2024-05-12 14:02:16] WARNING: DATA_LEAK_PREVENTED -> TARGET: EXTERNAL_API</div>
+                 <div className="text-rose-500 font-bold">[2024-05-12 14:02:18] CRITICAL: SHADOW_AI_DETECTED -> ENDPOINT: 192.168.1.42</div>
+                 <div>[2024-05-12 14:02:21] AUDIT_LOG_IMMUTABLE_SYNC -> SUCCESS</div>
+                 <div className="animate-pulse">_</div>
+              </div>
            </div>
         </div>
       </div>
@@ -510,7 +558,7 @@ const ApplicationModal: React.FC<{ isOpen: boolean; onClose: () => void; role: s
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 animate-in fade-in duration-300">
       <div className="absolute inset-0 bg-swarm-dark/90 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative glass w-full max-w-lg rounded-[2.5rem] p-10 md:p-14 shadow-2xl border-white/10">
+      <div className="relative glass w-full max-lg rounded-[2.5rem] p-10 md:p-14 shadow-2xl border-white/10 max-w-lg">
         <button onClick={onClose} className="absolute top-8 right-8 text-slate-500 hover:text-white transition-colors"><X size={24} /></button>
         
         {status === 'success' ? (
@@ -631,6 +679,7 @@ const App: React.FC = () => {
             <span className="text-xl font-bold tracking-tight text-white">Swarm <span className="text-swarm-emerald">Security</span></span>
           </div>
           <div className="hidden lg:flex items-center gap-10">
+            <NavItem label="Home" active={currentPage === 'home'} onClick={() => handleNavigation('home')} />
             <NavItem label="Solutions" active={currentPage === 'solutions'} onClick={() => handleNavigation('solutions')} />
             <NavItem label="Platform" active={currentPage === 'platform'} onClick={() => handleNavigation('platform')} />
             <NavItem label="Careers" active={currentPage === 'careers'} onClick={() => handleNavigation('careers')} />
