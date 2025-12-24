@@ -370,11 +370,11 @@ const PlatformPage: React.FC = () => (
            </div>
            <div className="lg:order-1 glass p-10 rounded-[3rem] border-white/5 bg-black/40 h-72 overflow-hidden flex flex-col justify-end shadow-2xl">
               <div className="space-y-3 font-mono text-[10px] text-slate-400">
-                 <div>[2024-05-12 14:02:11] REQUEST_ID: 9821_AX -> APP_PROD -> STATUS: CLEAN</div>
-                 <div>[2024-05-12 14:02:15] REQUEST_ID: 9822_AX -> CLAUDE_EXT -> STATUS: REDACTED_PII</div>
-                 <div className="text-amber-500 font-bold">[2024-05-12 14:02:16] WARNING: DATA_LEAK_PREVENTED -> TARGET: EXTERNAL_API</div>
-                 <div className="text-rose-500 font-bold">[2024-05-12 14:02:18] CRITICAL: SHADOW_AI_DETECTED -> ENDPOINT: 192.168.1.42</div>
-                 <div>[2024-05-12 14:02:21] AUDIT_LOG_IMMUTABLE_SYNC -> SUCCESS</div>
+                 <div>[2024-05-12 14:02:11] REQUEST_ID: 9821_AX -&gt; APP_PROD -&gt; STATUS: CLEAN</div>
+                 <div>[2024-05-12 14:02:15] REQUEST_ID: 9822_AX -&gt; CLAUDE_EXT -&gt; STATUS: REDACTED_PII</div>
+                 <div className="text-amber-500 font-bold">[2024-05-12 14:02:16] WARNING: DATA_LEAK_PREVENTED -&gt; TARGET: EXTERNAL_API</div>
+                 <div className="text-rose-500 font-bold">[2024-05-12 14:02:18] CRITICAL: SHADOW_AI_DETECTED -&gt; ENDPOINT: 192.168.1.42</div>
+                 <div>[2024-05-12 14:02:21] AUDIT_LOG_IMMUTABLE_SYNC -&gt; SUCCESS</div>
                  <div className="animate-pulse">_</div>
               </div>
            </div>
