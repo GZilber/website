@@ -276,7 +276,7 @@ const HomePage: React.FC<{ onOpenModal: () => void, onNavigate: (p: Page) => voi
               AI Security Infrastructure
             </div>
             <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight leading-[1.05] text-white">
-              Visibility for the <br /><span className="text-swarm-emerald">Agentic Era.</span>
+              Tame the <br /><span className="text-swarm-emerald">Swarm.</span>
             </h1>
             <p className="text-lg md:text-xl text-slate-400 max-w-xl font-medium leading-relaxed">
               GenAI is a visibility vacuum. Swarm provides the high-performance proxy and discovery tools needed to unbox the black box and secure your AI stack.
