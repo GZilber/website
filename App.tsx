@@ -159,7 +159,6 @@ const PersonaHubGraphic: React.FC = () => {
 
       {/* Central Swarm Node - The Hub */}
       <div className="relative z-20 w-32 h-32 bg-swarm-emerald rounded-full flex items-center justify-center shadow-[0_0_80px_rgba(16,185,129,0.6)] border-4 border-white/30 transition-transform hover:scale-105 group cursor-default">
-        {/* User requested div container for the logo */}
         <div className="w-20 h-20 bg-white/10 rounded-2xl flex items-center justify-center text-white/50 border border-white/10 overflow-hidden shadow-inner">
           {SWARM_LOGO_B64 ? (
             <img 
@@ -298,7 +297,7 @@ const HomePage: React.FC<{ onOpenModal: () => void, onNavigate: (p: Page) => voi
           </div>
           <div className="relative flex justify-center items-center">
             <div className="absolute inset-0 bg-swarm-emerald/5 blur-[140px] rounded-full" />
-            <div className="relative w-full max-w-md aspect-square flex items-center justify-center animate-in zoom-in duration-1000">
+            <div className="relative w-full max-md aspect-square flex items-center justify-center animate-in zoom-in duration-1000">
               <SwarmLogo size={240} className="drop-shadow-[0_0_80px_rgba(16,185,129,0.4)]" />
             </div>
           </div>
@@ -557,7 +556,7 @@ const UseCasesPage: React.FC = () => (
         />
       </div>
 
-      {/* RE-DESIGNED Persona Section */}
+      {/* Persona Section */}
       <div className="mb-40 py-32 relative overflow-hidden bg-slate-950 rounded-[5rem] border border-white/5">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.12)_0%,transparent_70%)]" />
         <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-swarm-emerald/5 to-transparent" />
@@ -623,122 +622,64 @@ const SolutionsPage: React.FC = () => (
 );
 
 /**
- * CAREERS PAGE
+ * CAREERS PAGE - Updated Generic Teaser with Requested Text
  */
 const CareersPage: React.FC<{ onApply: (role: string) => void }> = ({ onApply }) => (
   <div className="pt-32 animate-in slide-in-from-bottom-12 duration-700">
     <div className="max-w-7xl mx-auto px-6">
-      <div className="max-w-3xl mb-24 space-y-6">
-        <div className="inline-block px-3 py-1 rounded bg-swarm-emerald/10 text-swarm-emerald text-xs font-bold uppercase tracking-widest">Join the Swarm</div>
-        <h2 className="text-5xl md:text-7xl font-extrabold tracking-tight">Build the Future <br />of AI Security.</h2>
-        <p className="text-xl text-slate-400 font-medium">We are scaling fast. Join our mission to secure the agentic era.</p>
-      </div>
+      <div className="max-w-4xl mx-auto text-center space-y-12 mb-40">
+        <div className="inline-block px-3 py-1 rounded bg-swarm-emerald/10 text-swarm-emerald text-xs font-bold uppercase tracking-widest">Join the Mission</div>
+        <h2 className="text-6xl md:text-8xl font-extrabold tracking-tighter leading-none">
+          Securing the <br />
+          <span className="text-swarm-emerald">Agentic Era.</span>
+        </h2>
+        
+        <div className="max-w-2xl mx-auto space-y-8">
+          <p className="text-xl md:text-2xl text-slate-300 font-medium leading-relaxed">
+            Swarm is a collective of engineers, designers, and security researchers building the infrastructure for the future of AI Enablement.
+          </p>
+          <p className="text-lg text-slate-500 leading-relaxed italic">
+            "Visibility is the first step toward sovereignty."
+          </p>
+        </div>
 
-      <div className="grid md:grid-cols-1 lg:grid-cols-2 gap-8 pb-40">
-        {[
-          { 
-            title: "VP Sales", 
-            icon: <TrendingUp />, 
-            desc: "Build and scale the global sales organization, driving enterprise adoption of Swarm's security stack.", 
-            requirements: [
-              "10+ years in enterprise security sales leadership.",
-              "Experience scaling teams from $1M to $50M+ ARR.",
-              "Strong network within the CISO and security community.",
-              "Strategic mindset with a focus on high-touch enterprise GTM."
-            ],
-            tag: "Leadership" 
-          },
-          { 
-            title: "Senior Developer", 
-            icon: <Code2 />, 
-            desc: "Lead full-stack architecture, focusing on sub-10ms proxy performance and complex security primitives.", 
-            requirements: [
-              "5+ years experience in distributed systems.",
-              "Deep expertise in TypeScript, Rust, or Go.",
-              "Experience building high-scale proxy layers or networking infra.",
-              "Proven record of shipping security-first enterprise software."
-            ],
-            tag: "Engineering" 
-          },
-          { 
-            title: "Backend Developer", 
-            icon: <Terminal />, 
-            desc: "Optimize token inspection engines and immutable audit infrastructure.", 
-            requirements: [
-              "2+ years of backend engineering experience.",
-              "Strong understanding of LLM orchestration and vector databases.",
-              "Experience with eBPF or low-level networking primitives.",
-              "Familiarity with immutable logging standards."
-            ],
-            tag: "Engineering" 
-          },
-          { 
-            title: "UI/UX Designer", 
-            icon: <Palette />, 
-            desc: "Define the visual language for complex AI visibility systems. Aesthetic excellence is mandatory.", 
-            requirements: [
-              "3+ years of experience in product design for security tools.",
-              "Strong portfolio demonstrating data visualization skills.",
-              "Expertise in motion design and high-fidelity prototyping.",
-              "Deep empathy for SecOps and Engineering personas."
-            ],
-            tag: "Design" 
-          },
-          { 
-            title: "Product Manager", 
-            icon: <Layout />, 
-            desc: "Translate enterprise security needs into technical governance frameworks.", 
-            requirements: [
-              "3+ years in technical product management.",
-              "Background in cybersecurity or AI infrastructure.",
-              "Ability to interface with CISO and AI Engineering personas.",
-              "Proven success taking technical products from 0 to 1."
-            ],
-            tag: "Product" 
-          },
-          { 
-            title: "Office Manager", 
-            icon: <Building2 />, 
-            desc: "Ensure smooth daily operations of our San Francisco headquarters and support team culture.", 
-            requirements: [
-              "3+ years in office operations at a high-growth startup.",
-              "Experience with vendor management and procurement.",
-              "Strong proficiency in workspace management tools.",
-              "Must be able to work on-site in San Francisco daily."
-            ],
-            tag: "Operations" 
-          }
-        ].map((job, i) => (
-          <div key={i} className="glass p-10 rounded-[2.5rem] card-hover flex flex-col justify-between space-y-10">
-            <div className="space-y-8">
-              <div className="flex justify-between items-start">
-                <div className="w-14 h-14 rounded-2xl bg-swarm-emerald/10 flex items-center justify-center text-swarm-emerald shadow-md">{job.icon}</div>
-                <div className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-widest text-slate-400">{job.tag}</div>
-              </div>
-              <div className="space-y-4">
-                <h3 className="text-2xl font-bold text-white">{job.title}</h3>
-                <p className="text-slate-500 font-medium leading-relaxed">{job.desc}</p>
-              </div>
-              <div className="space-y-3">
-                 <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-swarm-emerald">Minimum Requirements</h4>
-                 <ul className="space-y-2">
-                    {job.requirements.map((req, ridx) => (
-                       <li key={ridx} className="flex gap-3 text-sm text-slate-400 font-medium leading-relaxed">
-                          <div className="w-1 h-1 rounded-full bg-swarm-emerald mt-2.5 flex-none" />
-                          {req}
-                       </li>
-                    ))}
-                 </ul>
+        <div className="relative group max-w-3xl mx-auto">
+          <div className="absolute -inset-1 bg-gradient-to-r from-swarm-emerald/20 to-transparent blur-xl opacity-50 group-hover:opacity-100 transition duration-1000"></div>
+          <div className="relative glass p-12 md:p-20 rounded-[4rem] border-white/5 bg-black/40 space-y-10">
+            <div className="flex justify-center">
+              <div className="p-6 bg-swarm-emerald/10 rounded-full text-swarm-emerald shadow-[0_0_50px_rgba(16,185,129,0.2)]">
+                <Users size={48} />
               </div>
             </div>
+            <div className="space-y-6">
+              <h3 className="text-3xl font-bold text-white">Always Seeking Excellence.</h3>
+              <p className="text-slate-400 font-medium">
+                We hire for trajectory, not just pedigree. If you are obsessed with low-level systems, high-performance security, or the intersection of human and machine intelligence, we want to hear from you.
+              </p>
+            </div>
+            
             <button 
-              onClick={() => onApply(job.title)} 
-              className="flex items-center gap-4 px-8 py-4 bg-swarm-emerald/5 border border-swarm-emerald/20 text-swarm-emerald rounded-xl text-xs font-black uppercase tracking-widest hover:bg-swarm-emerald hover:text-swarm-dark transition-all group w-fit"
+              onClick={() => onApply('General Application')} 
+              className="px-12 py-5 bg-swarm-emerald text-swarm-dark rounded-2xl font-black text-sm uppercase tracking-[0.2em] hover:bg-white transition-all shadow-2xl hover:scale-105 active:scale-95 mx-auto flex items-center gap-4"
             >
-               Apply for Role <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+              Contact Us <ArrowRight size={20} />
             </button>
           </div>
-        ))}
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 pt-20">
+          {[
+            { icon: <Terminal size={24} />, label: "Systems Infra" },
+            { icon: <Lock size={24} />, label: "Sec-Ops" },
+            { icon: <Code2 size={24} />, label: "Full-Stack" },
+            { icon: <Palette size={24} />, label: "Product Design" }
+          ].map((item, i) => (
+            <div key={i} className="flex flex-col items-center gap-4 text-slate-500 hover:text-white transition-colors">
+              <div className="p-4 glass rounded-2xl border-white/5">{item.icon}</div>
+              <span className="text-[10px] font-black uppercase tracking-widest">{item.label}</span>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   </div>
@@ -780,9 +721,9 @@ const ApplicationModal: React.FC<{ isOpen: boolean; onClose: () => void; role: s
                <CheckCircle2 size={40} className="text-swarm-emerald" />
              </div>
              <div className="space-y-4">
-                <h3 className="text-3xl font-bold text-white leading-none">Application Sent</h3>
+                <h3 className="text-3xl font-bold text-white leading-none">Transmission Sent</h3>
                 <p className="text-slate-400 text-sm font-medium leading-relaxed max-w-xs mx-auto">
-                   Thank you for applying to the <span className="text-swarm-emerald font-bold">{role}</span> position.
+                   Your profile has been indexed. We will contact you if there is a semantic match.
                 </p>
              </div>
              <button onClick={onClose} className="px-12 py-4 bg-white text-swarm-dark rounded-xl text-xs font-black uppercase tracking-widest hover:bg-swarm-emerald transition-all shadow-lg">Close</button>
@@ -790,8 +731,8 @@ const ApplicationModal: React.FC<{ isOpen: boolean; onClose: () => void; role: s
         ) : (
           <div className="space-y-10">
             <div className="space-y-3">
-              <h3 className="text-3xl font-bold text-white tracking-tight">Apply for <span className="text-swarm-emerald">{role}</span></h3>
-              <p className="text-slate-500 text-sm font-medium">Upload your Resume / CV (PDF or DOCX) to get started.</p>
+              <h3 className="text-3xl font-bold text-white tracking-tight">Initiate <span className="text-swarm-emerald">Onboarding</span></h3>
+              <p className="text-slate-500 text-sm font-medium">Upload your dossier (PDF/DOCX) for evaluation.</p>
             </div>
 
             <form className="space-y-8" onSubmit={handleApply}>
@@ -821,7 +762,7 @@ const ApplicationModal: React.FC<{ isOpen: boolean; onClose: () => void; role: s
                        <Upload size={32} className="text-slate-400 group-hover:text-swarm-emerald" />
                     </div>
                     <div className="space-y-1">
-                       <p className="text-white font-bold text-sm">Select File</p>
+                       <p className="text-white font-bold text-sm">Select Dossier</p>
                        <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest">Select your Resume / CV</p>
                     </div>
                   </div>
@@ -841,9 +782,9 @@ const ApplicationModal: React.FC<{ isOpen: boolean; onClose: () => void; role: s
               >
                 {status === 'uploading' ? (
                   <>
-                    <Loader2 className="animate-spin" size={18} /> Sending Application...
+                    <Loader2 className="animate-spin" size={18} /> Syncing Data...
                   </>
-                ) : "Submit Application"}
+                ) : "Submit Dossier"}
               </button>
             </form>
           </div>
