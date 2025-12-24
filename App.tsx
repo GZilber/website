@@ -27,7 +27,16 @@ import {
   Upload,
   FileText,
   Building2,
-  TrendingUp
+  TrendingUp,
+  Shield,
+  Zap,
+  HardDrive,
+  Scale,
+  Users,
+  Eye,
+  Server,
+  Target,
+  BarChart3
 } from 'lucide-react';
 
 /**
@@ -132,6 +141,66 @@ const AssetGraphVisual: React.FC = () => {
   );
 };
 
+/**
+ * PERSONA HUB GRAPHIC
+ */
+const PersonaHubGraphic: React.FC = () => {
+  return (
+    <div className="relative w-full aspect-square max-w-[440px] mx-auto flex items-center justify-center">
+      {/* Background Pulse Rings */}
+      <div className="absolute w-full h-full rounded-full border border-swarm-emerald/10 animate-pulse" />
+      <div className="absolute w-[85%] h-[85%] rounded-full border border-swarm-emerald/5 animate-[pulse_4s_infinite]" />
+      <div className="absolute w-[65%] h-[65%] rounded-full border border-swarm-emerald/20" />
+      
+      {/* Rotating Connection Line */}
+      <div className="absolute inset-0 animate-[spin_20s_infinite_linear]">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1 h-full bg-gradient-to-b from-swarm-emerald/40 via-transparent to-swarm-emerald/40 opacity-20" />
+      </div>
+
+      {/* Central Swarm Node - The Hub */}
+      <div className="relative z-20 w-32 h-32 bg-swarm-emerald rounded-full flex items-center justify-center shadow-[0_0_80px_rgba(16,185,129,0.6)] border-4 border-white/30 transition-transform hover:scale-105 group cursor-default">
+        {/* User requested div container for the logo */}
+        <div className="w-20 h-20 bg-white/10 rounded-2xl flex items-center justify-center text-white/50 border border-white/10 overflow-hidden shadow-inner">
+          {SWARM_LOGO_B64 ? (
+            <img 
+              src={SWARM_LOGO_B64} 
+              alt="Swarm" 
+              className="w-16 h-16 object-contain block z-30" 
+              draggable={false} 
+            />
+          ) : (
+            <Target size={32} className="opacity-40" />
+          )}
+        </div>
+        <div className="absolute -inset-4 rounded-full border border-white/10 animate-ping opacity-20 pointer-events-none" />
+      </div>
+
+      {/* Orbiting Role Nodes */}
+      {[
+        { icon: <ShieldCheck size={24} />, pos: "top-[-5%] left-1/2 -translate-x-1/2", label: "CISO", color: "text-swarm-emerald" },
+        { icon: <Zap size={24} />, pos: "bottom-[-5%] left-1/2 -translate-x-1/2", label: "AI LEAD", color: "text-amber-400" },
+        { icon: <Scale size={24} />, pos: "left-[-5%] top-1/2 -translate-y-1/2", label: "GRC", color: "text-blue-400" },
+        { icon: <Server size={24} />, pos: "right-[-5%] top-1/2 -translate-y-1/2", label: "IT INFRA", color: "text-purple-400" }
+      ].map((node, i) => (
+        <div key={i} className={`absolute ${node.pos} flex flex-col items-center gap-3 group z-30`}>
+          <div className="w-16 h-16 glass rounded-2xl flex items-center justify-center bg-swarm-dark/80 text-white border-white/10 group-hover:border-swarm-emerald/50 group-hover:scale-110 transition-all shadow-2xl overflow-hidden relative">
+            <div className={`absolute inset-0 bg-white/5 group-hover:bg-swarm-emerald/5 transition-colors`} />
+            <div className={node.color}>{node.icon}</div>
+          </div>
+          <span className="text-[11px] font-black tracking-[0.2em] text-slate-400 group-hover:text-white transition-colors bg-swarm-dark/50 px-2 py-0.5 rounded backdrop-blur-sm">{node.label}</span>
+        </div>
+      ))}
+      
+      <style>{`
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
+    </div>
+  );
+};
+
 const InquiryService = {
   submit: async (data: any) => {
     try {
@@ -180,7 +249,7 @@ const Footer: React.FC<{ onNavigate: (p: Page) => void }> = ({ onNavigate }) => 
           <h5 className="text-sm font-semibold text-white uppercase tracking-wider">Company</h5>
           <ul className="space-y-3 text-sm text-slate-400">
             <li className="hover:text-swarm-emerald cursor-pointer" onClick={() => onNavigate('home')}>Home</li>
-            <li className="hover:text-swarm-emerald cursor-pointer" onClick={() => onNavigate('solutions')}>Solutions</li>
+            <li className="hover:text-swarm-emerald cursor-pointer" onClick={() => onNavigate('solutions')}>Use Cases</li>
             <li className="hover:text-swarm-emerald cursor-pointer" onClick={() => onNavigate('careers')}>Careers</li>
           </ul>
         </div>
@@ -402,29 +471,155 @@ const PlatformPage: React.FC = () => (
   </div>
 );
 
-const SolutionsPage: React.FC = () => (
+const UseCaseCard: React.FC<{ 
+  title: string; 
+  target: string; 
+  desc: string; 
+  benefit: string; 
+  icon: React.ReactNode 
+}> = ({ title, target, desc, benefit, icon }) => (
+  <div className="glass p-10 rounded-[2.5rem] card-hover flex flex-col h-full border-white/5 bg-black/20">
+    <div className="flex justify-between items-start mb-10">
+      <div className="p-4 bg-swarm-emerald/10 rounded-2xl text-swarm-emerald shadow-lg border border-swarm-emerald/10">
+        {icon}
+      </div>
+      <div className="px-3 py-1 rounded-full bg-swarm-emerald/5 border border-swarm-emerald/20 text-[10px] font-black uppercase tracking-widest text-swarm-emerald">
+        {target}
+      </div>
+    </div>
+    <div className="flex-grow space-y-4">
+      <h3 className="text-2xl font-bold text-white tracking-tight">{title}</h3>
+      <p className="text-slate-400 font-medium leading-relaxed text-sm">{desc}</p>
+    </div>
+    <div className="mt-8 pt-8 border-t border-white/5">
+      <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-swarm-emerald mb-3">Key Outcome</h4>
+      <p className="text-slate-200 text-sm font-bold leading-relaxed">{benefit}</p>
+    </div>
+  </div>
+);
+
+const StakeholderCard: React.FC<{
+  role: string;
+  icon: React.ReactNode;
+  desc: string;
+}> = ({ role, icon, desc }) => (
+  <div className="glass p-10 rounded-[2.5rem] border-white/10 bg-slate-900/40 hover:bg-slate-800/60 transition-all group flex flex-col gap-6 shadow-xl relative overflow-hidden">
+    <div className="absolute top-0 right-0 w-32 h-32 bg-swarm-emerald/5 blur-3xl rounded-full -mr-16 -mt-16 group-hover:bg-swarm-emerald/10 transition-all" />
+    <div className="flex items-center gap-5 relative z-10">
+      <div className="w-16 h-16 rounded-2xl bg-swarm-emerald/10 flex items-center justify-center text-swarm-emerald group-hover:bg-swarm-emerald group-hover:text-swarm-dark transition-all shadow-lg border border-swarm-emerald/20">
+        {icon}
+      </div>
+      <h4 className="text-2xl font-extrabold text-white tracking-tight">{role}</h4>
+    </div>
+    <p className="text-slate-200 text-base font-semibold leading-relaxed relative z-10 group-hover:text-white transition-colors">
+      {desc}
+    </p>
+  </div>
+);
+
+const UseCasesPage: React.FC = () => (
   <div className="pt-32 animate-in slide-in-from-bottom-12 duration-700">
     <div className="max-w-7xl mx-auto px-6">
       <div className="max-w-3xl mb-24 space-y-6">
-        <div className="inline-block px-3 py-1 rounded bg-swarm-emerald/10 text-swarm-emerald text-xs font-bold uppercase tracking-widest">Industry Solutions</div>
-        <h2 className="text-5xl md:text-7xl font-extrabold tracking-tight">Enterprise <br />Governance.</h2>
-        <p className="text-xl text-slate-400 font-medium">Securing AI adoption across every department.</p>
+        <div className="inline-block px-3 py-1 rounded bg-swarm-emerald/10 text-swarm-emerald text-xs font-bold uppercase tracking-widest">Enterprise Use Cases</div>
+        <h2 className="text-5xl md:text-7xl font-extrabold tracking-tight">Securing AI<br />at Scale.</h2>
+        <p className="text-xl text-slate-400 font-medium">From financial services to autonomous agent orchestration, Swarm provides the visibility layer for the modern AI stack.</p>
       </div>
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 pb-40">
-        {[
-          { title: "InfoSec", icon: <ShieldCheck />, desc: "Stop secrets leakage and discover shadow AI tools." },
-          { title: "AI Engineering", icon: <Cpu />, desc: "Build confidence in autonomous swarms with agent injection prevention." },
-          { title: "Compliance & GRC", icon: <FileSearch />, desc: "Verifiable audit trails mapped to regulatory frameworks like SOC2." }
-        ].map((sol, i) => (
-          <div key={i} className="glass p-12 rounded-[2.5rem] card-hover space-y-8">
-            <div className="w-16 h-16 rounded-2xl bg-swarm-emerald/10 flex items-center justify-center text-swarm-emerald shadow-md">{sol.icon}</div>
-            <h3 className="text-2xl font-bold text-white">{sol.title}</h3>
-            <p className="text-slate-500 font-medium leading-relaxed">{sol.desc}</p>
+      
+      <div className="grid md:grid-cols-2 lg:grid-cols-2 gap-8 mb-40">
+        <UseCaseCard 
+          title="Data Leak Prevention (DLP)"
+          target="InfoSec & CISO"
+          icon={<Shield size={28} />}
+          desc="Automated discovery and redaction of PII, PHI, and internal secrets before they leave your perimeter. Our sub-10ms proxy ensures security doesn't break the user experience."
+          benefit="Enable tools like ChatGPT/Claude across the workforce while maintaining strict GDPR, SOC2, and HIPAA compliance."
+        />
+        <UseCaseCard 
+          title="Autonomous Agent Governance"
+          target="AI Architects"
+          icon={<Zap size={28} />}
+          desc="Autonomous swarms often experience 'agentic drift.' Swarm enforces tool-calling constraints and prevents prompt injections that could lead to unauthorized system actions."
+          benefit="Deploy agentic workflows with confidence, knowing every system interaction is gated by semantic security policies."
+        />
+        <UseCaseCard 
+          title="Shadow AI Discovery"
+          target="IT Operations"
+          icon={<HardDrive size={28} />}
+          desc="Teams often bypass centralized IT to use unmanaged LLM providers. Swarm automatically maps every AI connection in your network to surface unvetted endpoints."
+          benefit="Consolidate AI spend and eliminate security 'dark spots' by bringing all GenAI activity under a single management plane."
+        />
+        <UseCaseCard 
+          title="Compliance & Audit Trails"
+          target="GRC & Legal"
+          icon={<Scale size={28} />}
+          desc="Regulated industries require verifiable logs for advice-driven AI. Swarm records high-fidelity, immutable semantic context for every interaction for forensic review."
+          benefit="Meet stringent transparency requirements and protect against liability by proving what an AI said—and why it said it."
+        />
+      </div>
+
+      {/* RE-DESIGNED Persona Section */}
+      <div className="mb-40 py-32 relative overflow-hidden bg-slate-950 rounded-[5rem] border border-white/5">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.12)_0%,transparent_70%)]" />
+        <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-swarm-emerald/5 to-transparent" />
+        
+        <div className="relative z-10 max-w-7xl mx-auto px-6">
+          <div className="grid lg:grid-cols-2 gap-24 items-center">
+            {/* Left Column: Header & Graphic */}
+            <div className="space-y-16 text-center lg:text-left">
+              <div className="space-y-8">
+                <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-swarm-emerald/10 border border-swarm-emerald/20 text-swarm-emerald text-xs font-black uppercase tracking-[0.3em] mx-auto lg:mx-0">
+                  <Users size={16} /> Organizational Hub
+                </div>
+                <h3 className="text-5xl md:text-7xl font-extrabold tracking-tighter text-white leading-[1.05]">
+                  Who is <br /><span className="text-swarm-emerald underline decoration-swarm-emerald/20 decoration-8 underline-offset-8">Swarm for?</span>
+                </h3>
+                <p className="text-xl text-slate-300 font-bold leading-relaxed max-w-lg mx-auto lg:mx-0">
+                  Swarm creates a unified visibility layer that bridges the gap between executive risk management and engineering speed.
+                </p>
+              </div>
+              
+              <div className="hidden lg:block animate-in fade-in zoom-in duration-1000 delay-300">
+                <PersonaHubGraphic />
+              </div>
+            </div>
+
+            {/* Right Column: Cards Grid */}
+            <div className="grid md:grid-cols-1 gap-8">
+              <StakeholderCard 
+                role="The CISO"
+                icon={<ShieldCheck size={32} />}
+                desc="Needs to say 'Yes' to GenAI without losing sleep over the next major data breach or prompt injection exploit."
+              />
+              <StakeholderCard 
+                role="The AI Lead"
+                icon={<Zap size={32} />}
+                desc="Needs to build complex, multi-agent swarms that are robust enough for production-grade reliability and security."
+              />
+              <StakeholderCard 
+                role="The GRC Manager"
+                icon={<Scale size={32} />}
+                desc="Needs verifiable evidence that AI systems are operating within the boundaries of law and corporate policy."
+              />
+              <StakeholderCard 
+                role="IT Infrastructure"
+                icon={<Server size={32} />}
+                desc="Needs to manage the sprawl of API endpoints and compute costs associated with the modern AI-powered enterprise."
+              />
+              
+              {/* Mobile Graphic */}
+              <div className="pt-12 lg:hidden flex justify-center">
+                <PersonaHubGraphic />
+              </div>
+            </div>
           </div>
-        ))}
+        </div>
       </div>
     </div>
   </div>
+);
+
+const SolutionsPage: React.FC = () => (
+  <UseCasesPage />
 );
 
 /**
@@ -698,7 +893,7 @@ const App: React.FC = () => {
           </div>
           <div className="hidden lg:flex items-center gap-10">
             <NavItem label="Home" active={currentPage === 'home'} onClick={() => handleNavigation('home')} />
-            <NavItem label="Solutions" active={currentPage === 'solutions'} onClick={() => handleNavigation('solutions')} />
+            <NavItem label="Use Cases" active={currentPage === 'solutions'} onClick={() => handleNavigation('solutions')} />
             <NavItem label="Platform" active={currentPage === 'platform'} onClick={() => handleNavigation('platform')} />
             <NavItem label="Careers" active={currentPage === 'careers'} onClick={() => handleNavigation('careers')} />
             <button 
@@ -743,7 +938,7 @@ const AccessModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpe
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 animate-in fade-in duration-300">
       <div className="absolute inset-0 bg-swarm-dark/90 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative glass w-full max-w-lg rounded-[2.5rem] p-8 md:p-14 shadow-2xl border-white/10">
+      <div className="relative glass w-full max-lg rounded-[2.5rem] p-8 md:p-14 shadow-2xl border-white/10 max-w-lg">
         <button onClick={onClose} className="absolute top-8 right-8 text-slate-500 hover:text-white transition-colors"><X size={24} /></button>
         
         {status === 'success' ? (
