@@ -649,9 +649,33 @@ const CareersPage: React.FC<{ onApply: (role: string) => void }> = ({ onApply })
 const ApplicationModal: React.FC<{ isOpen: boolean; onClose: () => void; role: string }> = ({ isOpen, onClose, role }) => {
   const [file, setFile] = useState<File | null>(null);
   const [status, setStatus] = useState<'idle' | 'uploading' | 'success' | 'error'>('idle');
+  const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  if (!isOpen) return null;
+  // AUTO-RESET Logic: Resets state whenever modal is closed
+  useEffect(() => {
+    if (!isOpen) {
+      setFile(null);
+      setStatus('idle');
+      setIsDragging(false);
+    }
+  }, [isOpen]);
+
+  const handleDrag = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") setIsDragging(true);
+    else if (e.type === "dragleave") setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      setFile(e.dataTransfer.files[0]);
+    }
+  };
 
   const handleApply = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -677,6 +701,8 @@ const ApplicationModal: React.FC<{ isOpen: boolean; onClose: () => void; role: s
     }
   };
 
+  if (!isOpen) return null;
+
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 animate-in fade-in duration-300">
       <div className="absolute inset-0 bg-swarm-dark/90 backdrop-blur-sm" onClick={onClose} />
@@ -700,13 +726,17 @@ const ApplicationModal: React.FC<{ isOpen: boolean; onClose: () => void; role: s
           <div className="space-y-10">
             <div className="space-y-3">
               <h3 className="text-3xl font-bold text-white tracking-tight">Initiate <span className="text-swarm-emerald">Onboarding</span></h3>
-              <p className="text-slate-500 text-sm font-medium">Upload your dossier (PDF/DOCX) for evaluation.</p>
+              <p className="text-slate-500 text-sm font-medium">Upload or drag your dossier (PDF/DOCX) for evaluation.</p>
             </div>
 
             <form className="space-y-8" onSubmit={handleApply}>
               <div 
                 onClick={() => fileInputRef.current?.click()}
-                className={`relative cursor-pointer group p-12 border-2 border-dashed rounded-[2rem] transition-all flex flex-col items-center justify-center gap-4 bg-white/5 border-white/10 hover:border-swarm-emerald/40 hover:bg-swarm-emerald/5`}
+                onDragEnter={handleDrag}
+                onDragOver={handleDrag}
+                onDragLeave={handleDrag}
+                onDrop={handleDrop}
+                className={`relative cursor-pointer group p-12 border-2 border-dashed rounded-[2rem] transition-all flex flex-col items-center justify-center gap-4 bg-white/5 border-white/10 hover:border-swarm-emerald/40 hover:bg-swarm-emerald/5 ${isDragging ? 'border-swarm-emerald bg-swarm-emerald/10' : ''}`}
               >
                 <input 
                   type="file" 
@@ -722,7 +752,7 @@ const ApplicationModal: React.FC<{ isOpen: boolean; onClose: () => void; role: s
                        <FileText size={32} className="text-swarm-emerald" />
                     </div>
                     <p className="text-white font-bold text-sm max-w-[200px] truncate">{file.name}</p>
-                    <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest">Click to change file</p>
+                    <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest">Click or Drop to change file</p>
                   </div>
                 ) : (
                   <div className="text-center space-y-4">
@@ -731,7 +761,7 @@ const ApplicationModal: React.FC<{ isOpen: boolean; onClose: () => void; role: s
                     </div>
                     <div className="space-y-1">
                        <p className="text-white font-bold text-sm">Select Dossier</p>
-                       <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest">Select your Resume / CV</p>
+                       <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest">Select or Drop Resume / CV</p>
                     </div>
                   </div>
                 )}
@@ -775,6 +805,14 @@ const handleNavigateToSection = (id: string) => {
 const AccessModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen, onClose }) => {
   const [formData, setFormData] = useState({ firstName: '', lastName: '', email: '', company: '', agreed: false });
   const [status, setStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
+
+  // AUTO-RESET Logic: Resets state whenever modal is closed
+  useEffect(() => {
+    if (!isOpen) {
+      setFormData({ firstName: '', lastName: '', email: '', company: '', agreed: false });
+      setStatus('idle');
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -922,7 +960,7 @@ const App: React.FC = () => {
       <main>
         {currentPage === 'home' && <HomePage onOpenModal={() => setIsDemoModalOpen(true)} onNavigate={handleNavigation} />}
         {currentPage === 'platform' && <PlatformPage />}
-        {currentPage === 'solutions' && <SolutionsPage />}
+        {currentPage === 'solutions' && <UseCasesPage />}
         {currentPage === 'careers' && <CareersPage onApply={handleApplyClick} />}
       </main>
       
