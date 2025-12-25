@@ -197,19 +197,37 @@ const PersonaHubGraphic: React.FC = () => {
     </div>
   );
 };
+
 const InquiryService = {
   submit: async function (data) {
-    const payload = {
-      name: `${data.firstName} ${data.lastName}`,
-      email: data.email,
-      message: `Inquiry from ${data.company}: ${data.message}`
-    };
-    const response = await fetch('send-email.guy-b12.workers.dev', { 
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-    return response.ok;
+    try {
+      const payload = {
+        name: `${data.firstName} ${data.lastName}`,
+        email: data.email,
+        message: data.role 
+          ? `Career Application for ${data.role}. Resume: ${data.resume}`
+          : `Inquiry from ${data.company}.`
+      };
+
+      // FIX: Added https:// to the start of the URL
+      const response = await fetch('https://send-email.guy-b12.workers.dev', { 
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json' 
+        },
+        body: JSON.stringify(payload)
+      });
+
+      // The Worker returns a text response "Sent!"
+      if (response.ok) {
+        const result = await response.text();
+        return result === "Sent!";
+      }
+      return false;
+    } catch (error) {
+      console.error("Handshake failed:", error);
+      return false;
+    }
   }
 };
 
