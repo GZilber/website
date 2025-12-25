@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { SWARM_LOGO_B64, BLACKBOX_IMAGE_B64, WORKER_URL}from './constants';
+import { SWARM_LOGO_B64, BLACKBOX_IMAGE_B64, WORKER_URL}from './consts';
 import { 
   X, 
   AlertTriangle, 
