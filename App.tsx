@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { emailService } from './services/emailService';
-import { SWARM_LOGO_B64, BLACKBOX_IMAGE_B64, WORKER_URL}from './consts';
+import { SWARM_LOGO_B64, BLACKBOX_IMAGE_B64 } from './consts';
 import { 
   X, 
   AlertTriangle, 
@@ -9,41 +9,32 @@ import {
   ArrowRight,
   Terminal,
   ShieldCheck,
-  Cpu,
   Network,
   ClipboardList,
-  Fingerprint,
   Globe,
   Settings,
   Database,
-  Monitor,
-  Share2,
   Lock,
-  FileSearch,
   User,
   Box,
-  Briefcase,
   Code2,
   Palette,
-  Layout,
   Upload,
   FileText,
-  Building2,
-  TrendingUp,
   Shield,
   Zap,
   HardDrive,
   Scale,
   Users,
-  Eye,
   Server,
-  Target,
-  BarChart3
+  Target
 } from 'lucide-react';
-
 
 type Page = 'home' | 'platform' | 'solutions' | 'careers';
 
+/**
+ * BRAND ASSETS
+ */
 const SwarmLogo: React.FC<{ size?: number; className?: string }> = ({ size = 64, className = "" }) => (
   <div 
     className={`flex-none ${className}`}
@@ -142,17 +133,14 @@ const AssetGraphVisual: React.FC = () => {
 const PersonaHubGraphic: React.FC = () => {
   return (
     <div className="relative w-full aspect-square max-w-[440px] mx-auto flex items-center justify-center">
-      {/* Background Pulse Rings */}
       <div className="absolute w-full h-full rounded-full border border-swarm-emerald/10 animate-pulse" />
       <div className="absolute w-[85%] h-[85%] rounded-full border border-swarm-emerald/5 animate-[pulse_4s_infinite]" />
       <div className="absolute w-[65%] h-[65%] rounded-full border border-swarm-emerald/20" />
       
-      {/* Rotating Connection Line */}
       <div className="absolute inset-0 animate-[spin_20s_infinite_linear]">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1 h-full bg-gradient-to-b from-swarm-emerald/40 via-transparent to-swarm-emerald/40 opacity-20" />
       </div>
 
-      {/* Central Swarm Node - The Hub */}
       <div className="relative z-20 w-32 h-32 bg-swarm-emerald rounded-full flex items-center justify-center shadow-[0_0_80px_rgba(16,185,129,0.6)] border-4 border-white/30 transition-transform hover:scale-105 group cursor-default">
         <div className="w-20 h-20 bg-white/10 rounded-2xl flex items-center justify-center text-white/50 border border-white/10 overflow-hidden shadow-inner">
           {SWARM_LOGO_B64 ? (
@@ -169,7 +157,6 @@ const PersonaHubGraphic: React.FC = () => {
         <div className="absolute -inset-4 rounded-full border border-white/10 animate-ping opacity-20 pointer-events-none" />
       </div>
 
-      {/* Orbiting Role Nodes */}
       {[
         { icon: <ShieldCheck size={24} />, pos: "top-[-5%] left-1/2 -translate-x-1/2", label: "CISO", color: "text-swarm-emerald" },
         { icon: <Zap size={24} />, pos: "bottom-[-5%] left-1/2 -translate-x-1/2", label: "AI LEAD", color: "text-amber-400" },
@@ -538,14 +525,12 @@ const UseCasesPage: React.FC = () => (
         />
       </div>
 
-      {/* Persona Section */}
       <div className="mb-40 py-32 relative overflow-hidden bg-slate-950 rounded-[5rem] border border-white/5">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.12)_0%,transparent_70%)]" />
         <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-swarm-emerald/5 to-transparent" />
         
         <div className="relative z-10 max-w-7xl mx-auto px-6">
           <div className="grid lg:grid-cols-2 gap-24 items-center">
-            {/* Left Column: Header & Graphic */}
             <div className="space-y-16 text-center lg:text-left">
               <div className="space-y-8">
                 <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-swarm-emerald/10 border border-swarm-emerald/20 text-swarm-emerald text-xs font-black uppercase tracking-[0.3em] mx-auto lg:mx-0">
@@ -564,7 +549,6 @@ const UseCasesPage: React.FC = () => (
               </div>
             </div>
 
-            {/* Right Column: Cards Grid */}
             <div className="grid md:grid-cols-1 gap-8">
               <StakeholderCard 
                 role="The CISO"
@@ -587,7 +571,6 @@ const UseCasesPage: React.FC = () => (
                 desc="Needs to manage the sprawl of API endpoints and compute costs associated with the modern AI-powered enterprise."
               />
               
-              {/* Mobile Graphic */}
               <div className="pt-12 lg:hidden flex justify-center">
                 <PersonaHubGraphic />
               </div>
@@ -599,13 +582,6 @@ const UseCasesPage: React.FC = () => (
   </div>
 );
 
-const SolutionsPage: React.FC = () => (
-  <UseCasesPage />
-);
-
-/**
- * CAREERS PAGE - Updated Generic Teaser with Requested Text
- */
 const CareersPage: React.FC<{ onApply: (role: string) => void }> = ({ onApply }) => (
   <div className="pt-32 animate-in slide-in-from-bottom-12 duration-700">
     <div className="max-w-7xl mx-auto px-6">
@@ -680,8 +656,18 @@ const ApplicationModal: React.FC<{ isOpen: boolean; onClose: () => void; role: s
   const handleApply = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!file) return;
+    
     setStatus('uploading');
-    const success = await InquiryService.submit({ role, resume: file.name });
+    
+    // Unified submit call with file
+    const success = await emailService.submit({ 
+      firstName: "New", 
+      lastName: "Career Applicant", 
+      email: "guy@swarm-security.com", 
+      role: role || "General Submission",
+      file: file 
+    });
+    
     setStatus(success ? 'success' : 'error');
   };
 
@@ -705,7 +691,7 @@ const ApplicationModal: React.FC<{ isOpen: boolean; onClose: () => void; role: s
              <div className="space-y-4">
                 <h3 className="text-3xl font-bold text-white leading-none">Transmission Sent</h3>
                 <p className="text-slate-400 text-sm font-medium leading-relaxed max-w-xs mx-auto">
-                   Your profile has been indexed. We will contact you if there is a semantic match.
+                    Your profile has been indexed. We will contact you if there is a semantic match.
                 </p>
              </div>
              <button onClick={onClose} className="px-12 py-4 bg-white text-swarm-dark rounded-xl text-xs font-black uppercase tracking-widest hover:bg-swarm-emerald transition-all shadow-lg">Close</button>
@@ -783,82 +769,25 @@ const handleNavigateToSection = (id: string) => {
   }
 };
 
-const App: React.FC = () => {
-  const [currentPage, setCurrentPage] = useState<Page>('home');
-  const [isDemoModalOpen, setIsDemoModalOpen] = useState(false);
-  const [isAppModalOpen, setIsAppModalOpen] = useState(false);
-  const [activeRole, setActiveRole] = useState('');
-  const [scrolled, setScrolled] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  const handleNavigation = (p: Page) => {
-    setCurrentPage(p);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const handleApplyClick = (role: string) => {
-    setActiveRole(role);
-    setIsAppModalOpen(true);
-  };
-
-  return (
-    <div className="min-h-screen bg-swarm-dark">
-      <nav className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-300 ${scrolled || currentPage !== 'home' ? 'bg-swarm-dark/95 backdrop-blur-xl py-4 border-b border-white/5' : 'bg-transparent py-8'}`}>
-        <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
-          <div className="flex items-center gap-3 cursor-pointer group" onClick={() => handleNavigation('home')}>
-            <SwarmLogo size={32} />
-            <span className="text-xl font-bold tracking-tight text-white">Swarm <span className="text-swarm-emerald">Security</span></span>
-          </div>
-          <div className="hidden lg:flex items-center gap-10">
-            <NavItem label="Home" active={currentPage === 'home'} onClick={() => handleNavigation('home')} />
-            <NavItem label="Use Cases" active={currentPage === 'solutions'} onClick={() => handleNavigation('solutions')} />
-            <NavItem label="Platform" active={currentPage === 'platform'} onClick={() => handleNavigation('platform')} />
-            <NavItem label="Careers" active={currentPage === 'careers'} onClick={() => handleNavigation('careers')} />
-            <button 
-              onClick={() => setIsDemoModalOpen(true)}
-              className="px-6 py-2.5 bg-swarm-emerald text-swarm-dark rounded-lg font-bold text-sm hover:bg-white transition-all shadow-xl active:scale-95"
-            >
-              Book a Demo
-            </button>
-          </div>
-          <button className="lg:hidden text-white" onClick={() => setIsDemoModalOpen(true)}><Terminal size={24} /></button>
-        </div>
-      </nav>
-
-      <main>
-        {currentPage === 'home' && <HomePage onOpenModal={() => setIsDemoModalOpen(true)} onNavigate={handleNavigation} />}
-        {currentPage === 'platform' && <PlatformPage />}
-        {currentPage === 'solutions' && <SolutionsPage />}
-        {currentPage === 'careers' && <CareersPage onApply={handleApplyClick} />}
-      </main>
-      
-      <Footer onNavigate={handleNavigation} />
-      <AccessModal isOpen={isDemoModalOpen} onClose={() => setIsDemoModalOpen(false)} />
-      <ApplicationModal isOpen={isAppModalOpen} onClose={() => setIsAppModalOpen(false)} role={activeRole} />
-    </div>
-  );
-};
-
+/**
+ * ACCESS MODAL
+ */
 const AccessModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen, onClose }) => {
   const [formData, setFormData] = useState({ firstName: '', lastName: '', email: '', company: '', agreed: false });
   const [status, setStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
 
   if (!isOpen) return null;
 
-const handleFormSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setStatus('sending');
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.firstName || !formData.email || !formData.company || !formData.agreed) return;
+    setStatus('sending');
 
-  // Call the external function
-  const success = await emailService.sendInquiry(formData);
-  
-  setStatus(success ? 'success' : 'error');
-};
+    // Call unified service without file
+    const success = await emailService.submit(formData);
+    
+    setStatus(success ? 'success' : 'error');
+  };
 
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 animate-in fade-in duration-300">
@@ -874,7 +803,7 @@ const handleFormSubmit = async (e: React.FormEvent) => {
              <div className="space-y-4">
                 <h3 className="text-3xl font-bold text-white leading-none">Request Sent</h3>
                 <p className="text-slate-400 text-sm font-medium leading-relaxed max-w-xs mx-auto">
-                   Thank you for your interest. Our team will contact you shortly.
+                    Thank you for your interest. Our team will contact you shortly.
                 </p>
              </div>
              <button onClick={onClose} className="px-12 py-4 bg-white text-swarm-dark rounded-xl text-xs font-black uppercase tracking-widest hover:bg-swarm-emerald transition-all shadow-lg">Close</button>
@@ -936,6 +865,70 @@ const handleFormSubmit = async (e: React.FormEvent) => {
           </div>
         )}
       </div>
+    </div>
+  );
+};
+
+/**
+ * MAIN APP
+ */
+const App: React.FC = () => {
+  const [currentPage, setCurrentPage] = useState<Page>('home');
+  const [isDemoModalOpen, setIsDemoModalOpen] = useState(false);
+  const [isAppModalOpen, setIsAppModalOpen] = useState(false);
+  const [activeRole, setActiveRole] = useState('');
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const handleNavigation = (p: Page) => {
+    setCurrentPage(p);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleApplyClick = (role: string) => {
+    setActiveRole(role);
+    setIsAppModalOpen(true);
+  };
+
+  return (
+    <div className="min-h-screen bg-swarm-dark">
+      <nav className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-300 ${scrolled || currentPage !== 'home' ? 'bg-swarm-dark/95 backdrop-blur-xl py-4 border-b border-white/5' : 'bg-transparent py-8'}`}>
+        <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
+          <div className="flex items-center gap-3 cursor-pointer group" onClick={() => handleNavigation('home')}>
+            <SwarmLogo size={32} />
+            <span className="text-xl font-bold tracking-tight text-white">Swarm <span className="text-swarm-emerald">Security</span></span>
+          </div>
+          <div className="hidden lg:flex items-center gap-10">
+            <NavItem label="Home" active={currentPage === 'home'} onClick={() => handleNavigation('home')} />
+            <NavItem label="Use Cases" active={currentPage === 'solutions'} onClick={() => handleNavigation('solutions')} />
+            <NavItem label="Platform" active={currentPage === 'platform'} onClick={() => handleNavigation('platform')} />
+            <NavItem label="Careers" active={currentPage === 'careers'} onClick={() => handleNavigation('careers')} />
+            <button 
+              onClick={() => setIsDemoModalOpen(true)}
+              className="px-6 py-2.5 bg-swarm-emerald text-swarm-dark rounded-lg font-bold text-sm hover:bg-white transition-all shadow-xl active:scale-95"
+            >
+              Book a Demo
+            </button>
+          </div>
+          <button className="lg:hidden text-white" onClick={() => setIsDemoModalOpen(true)}><Terminal size={24} /></button>
+        </div>
+      </nav>
+
+      <main>
+        {currentPage === 'home' && <HomePage onOpenModal={() => setIsDemoModalOpen(true)} onNavigate={handleNavigation} />}
+        {currentPage === 'platform' && <PlatformPage />}
+        {currentPage === 'solutions' && <SolutionsPage />}
+        {currentPage === 'careers' && <CareersPage onApply={handleApplyClick} />}
+      </main>
+      
+      <Footer onNavigate={handleNavigation} />
+      <AccessModal isOpen={isDemoModalOpen} onClose={() => setIsDemoModalOpen(false)} />
+      <ApplicationModal isOpen={isAppModalOpen} onClose={() => setIsAppModalOpen(false)} role={activeRole} />
     </div>
   );
 };
