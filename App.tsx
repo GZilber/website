@@ -256,7 +256,7 @@ const HomePage: React.FC<{ onOpenModal: () => void, onNavigate: (p: Page) => voi
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-swarm-emerald/10 border border-swarm-emerald/20 text-swarm-emerald text-xs font-bold uppercase tracking-widest">
               AI Security Infrastructure
             </div>
-              <h1 className="text-6xl md:text-xl font-extrabold tracking-tighter leading-none text-white whitespace-nowrap">
+              <h1 className="text-6xl md:text-x3 font-extrabold tracking-tighter leading-none text-white whitespace-nowrap">
                 Tame the <span className="text-swarm-emerald">Swarm.</span>
               </h1>
             <p className="text-lg md:text-xl text-slate-400 max-w-xl font-medium leading-relaxed">
