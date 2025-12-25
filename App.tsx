@@ -141,21 +141,34 @@ const PersonaHubGraphic: React.FC = () => {
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1 h-full bg-gradient-to-b from-swarm-emerald/40 via-transparent to-swarm-emerald/40 opacity-20" />
       </div>
 
-      <div className="relative z-20 w-32 h-32 bg-swarm-emerald rounded-full flex items-center justify-center shadow-[0_0_80px_rgba(16,185,129,0.6)] border-4 border-white/30 transition-transform hover:scale-105 group cursor-default">
-        <div className="w-20 h-20 bg-white/10 rounded-2xl flex items-center justify-center text-white/50 border border-white/10 overflow-hidden shadow-inner">
-          {SWARM_LOGO_B64 ? (
-            <img 
-              src={SWARM_LOGO_B64} 
-              alt="Swarm" 
-              className="w-16 h-16 object-contain block z-30" 
-              draggable={false} 
-            />
-          ) : (
-            <Target size={32} className="opacity-40" />
-          )}
-        </div>
-        <div className="absolute -inset-4 rounded-full border border-white/10 animate-ping opacity-20 pointer-events-none" />
-      </div>
+<div className="relative z-20 w-80 h-80 flex items-center justify-center transition-transform hover:scale-105 group cursor-default">
+  
+  {/* MASSIVE RADIAL GLOW - Broad background aura */}
+  <div className="absolute inset-0 bg-swarm-emerald/20 blur-[140px] rounded-full pointer-events-none animate-pulse" />
+  
+  {/* THE CIRCULAR GLASS CONTAINER - 2x Larger (w-40 h-40) */}
+  <div className="relative z-10 w-40 h-40 bg-white/5 rounded-full flex items-center justify-center text-white/50 border border-white/20 overflow-hidden shadow-[0_0_60px_rgba(16,185,129,0.3)] backdrop-blur-2xl">
+    {SWARM_LOGO_B64 ? (
+      <img 
+        src={SWARM_LOGO_B64} 
+        alt="Swarm" 
+        className="w-24 h-24 object-contain block z-30 drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]" 
+        draggable={false} 
+      />
+    ) : (
+      <Target size={64} className="opacity-40" />
+    )}
+    
+    {/* Inner Radial Highlight for spherical glass depth */}
+    <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,rgba(255,255,255,0.1),transparent)] pointer-events-none" />
+  </div>
+  
+  {/* DOUBLE-RADIUS PING - scale-[2] makes it 2x larger than the container */}
+  <div className="absolute w-40 h-40 rounded-full border border-swarm-emerald/50 animate-ping opacity-40 pointer-events-none scale-[2]" />
+  
+  {/* SECONDARY PING - For a trailing wave effect */}
+  <div className="absolute w-40 h-40 rounded-full border border-swarm-emerald/30 animate-ping opacity-20 pointer-events-none scale-[1.5] [animation-delay:0.5s]" />
+</div>
 
       {[
         { icon: <ShieldCheck size={24} />, pos: "top-[-5%] left-1/2 -translate-x-1/2", label: "CISO", color: "text-swarm-emerald" },
@@ -197,7 +210,7 @@ const Footer: React.FC<{ onNavigate: (p: Page) => void }> = ({ onNavigate }) => 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-16 mb-20">
         <div className="col-span-1 md:col-span-2 space-y-6">
           <div className="flex items-center gap-3 cursor-pointer" onClick={() => onNavigate('home')}>
-            <SwarmLogo size={36} />
+            <SwarmLogo size={100} />
             <span className="text-xl font-bold tracking-tight text-white">Swarm <span className="text-swarm-emerald">Security</span></span>
           </div>
           <p className="text-slate-400 text-sm leading-relaxed max-sm font-medium">
@@ -237,15 +250,15 @@ const Footer: React.FC<{ onNavigate: (p: Page) => void }> = ({ onNavigate }) => 
 const HomePage: React.FC<{ onOpenModal: () => void, onNavigate: (p: Page) => void }> = ({ onOpenModal, onNavigate }) => {
   return (
     <div className="animate-in fade-in duration-700">
-      <section className="relative min-h-[95vh] flex items-center pt-24 overflow-hidden bg-mesh">
+      <section className="relative flex items-center pb-0 overflow-hidden bg-mesh">
         <div className="max-w-7xl mx-auto px-6 relative z-10 grid lg:grid-cols-2 gap-16 items-center">
           <div className="space-y-8">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-swarm-emerald/10 border border-swarm-emerald/20 text-swarm-emerald text-xs font-bold uppercase tracking-widest">
               AI Security Infrastructure
             </div>
-            <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight leading-[1.05] text-white">
-              Tame the <br /><span className="text-swarm-emerald">Swarm.</span>
-            </h1>
+              <h1 className="text-6xl md:text-xl font-extrabold tracking-tighter leading-none text-white whitespace-nowrap">
+                Tame the <span className="text-swarm-emerald">Swarm.</span>
+              </h1>
             <p className="text-lg md:text-xl text-slate-400 max-w-xl font-medium leading-relaxed">
               GenAI is a visibility vacuum. Swarm provides the high-performance proxy and discovery tools needed to unbox the black box and secure your AI stack.
             </p>
@@ -273,7 +286,7 @@ const HomePage: React.FC<{ onOpenModal: () => void, onNavigate: (p: Page) => voi
         </div>
       </section>
 
-      <section id="black-box-narrative" className="py-32 relative border-y border-white/5">
+      <section id="black-box-narrative" className="pt-2 pb-12 relative border-y border-white/5">
         <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-24 items-center">
            <div className="order-2 lg:order-1 relative">
               <div className="absolute inset-0 bg-swarm-emerald/5 blur-[100px] rounded-full" />
@@ -594,7 +607,6 @@ const CareersPage: React.FC<{ onApply: (role: string) => void }> = ({ onApply })
         
         <div className="max-w-2xl mx-auto space-y-8">
           <p className="text-xl md:text-2xl text-slate-300 font-medium leading-relaxed">
-            Swarm is a collective of engineers, designers, and security researchers building the infrastructure for the future of AI Enablement.
           </p>
           <p className="text-lg text-slate-500 leading-relaxed italic">
             "Visibility is the first step toward sovereignty."
@@ -612,8 +624,7 @@ const CareersPage: React.FC<{ onApply: (role: string) => void }> = ({ onApply })
             <div className="space-y-6">
               <h3 className="text-3xl font-bold text-white">Always Seeking Excellence.</h3>
               <p className="text-slate-400 font-medium">
-                We hire for trajectory, not just pedigree. If you are obsessed with low-level systems, high-performance security, or the intersection of human and machine intelligence, we want to hear from you.
-              </p>
+                  We are building the security layer for an agentic world. We need sharp, direct people to help us build, scale, and design the core of the AI stack. High potential is our only filter.              </p>
             </div>
             
             <button 
@@ -649,33 +660,9 @@ const CareersPage: React.FC<{ onApply: (role: string) => void }> = ({ onApply })
 const ApplicationModal: React.FC<{ isOpen: boolean; onClose: () => void; role: string }> = ({ isOpen, onClose, role }) => {
   const [file, setFile] = useState<File | null>(null);
   const [status, setStatus] = useState<'idle' | 'uploading' | 'success' | 'error'>('idle');
-  const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // AUTO-RESET Logic: Resets state whenever modal is closed
-  useEffect(() => {
-    if (!isOpen) {
-      setFile(null);
-      setStatus('idle');
-      setIsDragging(false);
-    }
-  }, [isOpen]);
-
-  const handleDrag = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (e.type === "dragenter" || e.type === "dragover") setIsDragging(true);
-    else if (e.type === "dragleave") setIsDragging(false);
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(false);
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      setFile(e.dataTransfer.files[0]);
-    }
-  };
+  if (!isOpen) return null;
 
   const handleApply = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -701,8 +688,6 @@ const ApplicationModal: React.FC<{ isOpen: boolean; onClose: () => void; role: s
     }
   };
 
-  if (!isOpen) return null;
-
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 animate-in fade-in duration-300">
       <div className="absolute inset-0 bg-swarm-dark/90 backdrop-blur-sm" onClick={onClose} />
@@ -726,17 +711,13 @@ const ApplicationModal: React.FC<{ isOpen: boolean; onClose: () => void; role: s
           <div className="space-y-10">
             <div className="space-y-3">
               <h3 className="text-3xl font-bold text-white tracking-tight">Initiate <span className="text-swarm-emerald">Onboarding</span></h3>
-              <p className="text-slate-500 text-sm font-medium">Upload or drag your dossier (PDF/DOCX) for evaluation.</p>
+              <p className="text-slate-500 text-sm font-medium">Upload your dossier (PDF/DOCX) for evaluation.</p>
             </div>
 
             <form className="space-y-8" onSubmit={handleApply}>
               <div 
                 onClick={() => fileInputRef.current?.click()}
-                onDragEnter={handleDrag}
-                onDragOver={handleDrag}
-                onDragLeave={handleDrag}
-                onDrop={handleDrop}
-                className={`relative cursor-pointer group p-12 border-2 border-dashed rounded-[2rem] transition-all flex flex-col items-center justify-center gap-4 bg-white/5 border-white/10 hover:border-swarm-emerald/40 hover:bg-swarm-emerald/5 ${isDragging ? 'border-swarm-emerald bg-swarm-emerald/10' : ''}`}
+                className={`relative cursor-pointer group p-12 border-2 border-dashed rounded-[2rem] transition-all flex flex-col items-center justify-center gap-4 bg-white/5 border-white/10 hover:border-swarm-emerald/40 hover:bg-swarm-emerald/5`}
               >
                 <input 
                   type="file" 
@@ -752,7 +733,7 @@ const ApplicationModal: React.FC<{ isOpen: boolean; onClose: () => void; role: s
                        <FileText size={32} className="text-swarm-emerald" />
                     </div>
                     <p className="text-white font-bold text-sm max-w-[200px] truncate">{file.name}</p>
-                    <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest">Click or Drop to change file</p>
+                    <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest">Click to change file</p>
                   </div>
                 ) : (
                   <div className="text-center space-y-4">
@@ -760,8 +741,8 @@ const ApplicationModal: React.FC<{ isOpen: boolean; onClose: () => void; role: s
                        <Upload size={32} className="text-slate-400 group-hover:text-swarm-emerald" />
                     </div>
                     <div className="space-y-1">
-                       <p className="text-white font-bold text-sm">Select Dossier</p>
-                       <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest">Select or Drop Resume / CV</p>
+                       <p className="text-white font-bold text-sm">Upload CV</p>
+                       <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest">Select or Drag and Drop your CV</p>
                     </div>
                   </div>
                 )}
@@ -782,7 +763,7 @@ const ApplicationModal: React.FC<{ isOpen: boolean; onClose: () => void; role: s
                   <>
                     <Loader2 className="animate-spin" size={18} /> Syncing Data...
                   </>
-                ) : "Submit Dossier"}
+                ) : "Submit"}
               </button>
             </form>
           </div>
@@ -805,14 +786,6 @@ const handleNavigateToSection = (id: string) => {
 const AccessModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen, onClose }) => {
   const [formData, setFormData] = useState({ firstName: '', lastName: '', email: '', company: '', agreed: false });
   const [status, setStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
-
-  // AUTO-RESET Logic: Resets state whenever modal is closed
-  useEffect(() => {
-    if (!isOpen) {
-      setFormData({ firstName: '', lastName: '', email: '', company: '', agreed: false });
-      setStatus('idle');
-    }
-  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -897,7 +870,7 @@ const AccessModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpe
                   <>
                     <Loader2 className="animate-spin" size={18} /> Processing...
                   </>
-                ) : "Send Inquiry"}
+                ) : "Send"}
               </button>
             </form>
           </div>
@@ -938,12 +911,12 @@ const App: React.FC = () => {
       <nav className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-300 ${scrolled || currentPage !== 'home' ? 'bg-swarm-dark/95 backdrop-blur-xl py-4 border-b border-white/5' : 'bg-transparent py-8'}`}>
         <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
           <div className="flex items-center gap-3 cursor-pointer group" onClick={() => handleNavigation('home')}>
-            <SwarmLogo size={32} />
+            <SwarmLogo size={52} />
             <span className="text-xl font-bold tracking-tight text-white">Swarm <span className="text-swarm-emerald">Security</span></span>
           </div>
           <div className="hidden lg:flex items-center gap-10">
             <NavItem label="Home" active={currentPage === 'home'} onClick={() => handleNavigation('home')} />
-            <NavItem label="Use Cases" active={currentPage === 'solutions'} onClick={() => handleNavigation('solutions')} />
+            <NavItem label="Use Cases" active={currentPage === 'solutions'&& <UseCasesPage />} onClick={() => handleNavigation('solutions')} />
             <NavItem label="Platform" active={currentPage === 'platform'} onClick={() => handleNavigation('platform')} />
             <NavItem label="Careers" active={currentPage === 'careers'} onClick={() => handleNavigation('careers')} />
             <button 
