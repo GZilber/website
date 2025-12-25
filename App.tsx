@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { SWARM_LOGO_B64, BLACKBOX_IMAGE_B64, WORKER_URL}from './constants';
 import { 
   X, 
   AlertTriangle, 
@@ -39,11 +40,6 @@ import {
   BarChart3
 } from 'lucide-react';
 
-/**
- * BRAND ASSETS
- */
-const SWARM_LOGO_B64 = ""
-const BLACKBOX_IMAGE_B64 = ""
 
 type Page = 'home' | 'platform' | 'solutions' | 'careers';
 
@@ -210,7 +206,7 @@ const InquiryService = {
       };
 
       // FIX: Added https:// to the start of the URL
-      const response = await fetch('https://send-email.guy-b12.workers.dev', { 
+      const response = await fetch(WORKER_URL, { 
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json' 
