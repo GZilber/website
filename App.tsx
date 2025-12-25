@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { emailService } from './services/emailService';
 import { SWARM_LOGO_B64, BLACKBOX_IMAGE_B64, WORKER_URL}from './consts';
 import { 
   X, 
@@ -192,39 +193,6 @@ const PersonaHubGraphic: React.FC = () => {
       `}</style>
     </div>
   );
-};
-
-const InquiryService = {
-  submit: async function (data) {
-    try {
-      const payload = {
-        name: `${data.firstName} ${data.lastName}`,
-        email: data.email,
-        message: data.role 
-          ? `Career Application for ${data.role}. Resume: ${data.resume}`
-          : `Inquiry from ${data.company}.`
-      };
-
-      // FIX: Added https:// to the start of the URL
-      const response = await fetch(WORKER_URL, { 
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json' 
-        },
-        body: JSON.stringify(payload)
-      });
-
-      // The Worker returns a text response "Sent!"
-      if (response.ok) {
-        const result = await response.text();
-        return result === "Sent!";
-      }
-      return false;
-    } catch (error) {
-      console.error("Handshake failed:", error);
-      return false;
-    }
-  }
 };
 
 const NavItem: React.FC<{ label: string; active: boolean; onClick: () => void }> = ({ label, active, onClick }) => (
@@ -882,13 +850,15 @@ const AccessModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpe
 
   if (!isOpen) return null;
 
-  const handleFormSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.firstName || !formData.email || !formData.company || !formData.agreed) return;
-    setStatus('sending');
-    const success = await InquiryService.submit(formData);
-    setStatus(success ? 'success' : 'error');
-  };
+const handleFormSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setStatus('sending');
+
+  // Call the external function
+  const success = await emailService.sendInquiry(formData);
+  
+  setStatus(success ? 'success' : 'error');
+};
 
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 animate-in fade-in duration-300">
