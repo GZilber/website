@@ -265,7 +265,7 @@ const HomePage: React.FC<{ onOpenModal: () => void, onNavigate: (p: Page) => voi
                 Book a Demo
               </button>
               <button 
-                onClick={() => handleNavigateToSection('black-box-narrative')}
+                onClick={() => onNavigate('solutions')}
                 className="w-full sm:w-auto px-10 py-4 glass text-white rounded-xl font-bold text-sm hover:bg-white/5 transition-all"
               >
                 See the Impact
