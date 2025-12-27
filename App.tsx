@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { emailService } from './services/emailService';
-import { SWARM_LOGO_B64, BLACKBOX_IMAGE_B64, LOGO_GIF_B64 } from './consts';
+import { SWARM_LOGO_B64, BLACKBOX_IMAGE_B64, LOGO_GIF_B64, SHADOWAI_B64, DLP_B64, AGENT_GOVERN_B64, COMPLIANCE_B64 } from './consts';
 import { 
   X, 
   AlertTriangle, 
@@ -493,23 +493,29 @@ const UseCaseCard: React.FC<{
   icon: React.ReactNode 
 }> = ({ title, target, desc, benefit, icon }) => (
   <div className="glass p-8 md:p-10 rounded-[2rem] md:rounded-[2.5rem] card-hover flex flex-col h-full border-white/5 bg-black/20">
-    <div className="flex justify-between items-start mb-6 md:mb-10">
-      <div className="p-3 md:p-4 bg-swarm-emerald/10 rounded-2xl text-swarm-emerald shadow-lg border border-swarm-emerald/10">
-        {React.cloneElement(icon as React.ReactElement, { size: 24 })}
+    <div className="flex justify-between items-start mb-8"> {/* Increased margin for larger icon */}
+      
+      {/* SCALED UP CONTAINER: Now 2.5x larger (w-20/h-20) */}
+      <div className="w-48 h-48 md:w-48 md:h-48 flex items-center justify-center overflow-hidden">
+        {icon}
       </div>
+
       <div className="px-3 py-1 rounded-full bg-swarm-emerald/5 border border-swarm-emerald/20 text-[9px] md:text-[10px] font-black uppercase tracking-widest text-swarm-emerald">
         {target}
       </div>
     </div>
+
     <div className="flex-grow space-y-3 md:space-y-4">
       <h3 className="text-xl md:text-2xl font-bold text-white tracking-tight">{title}</h3>
       <p className="text-slate-400 font-medium leading-relaxed text-sm">{desc}</p>
     </div>
+
     <div className="mt-6 md:mt-8 pt-6 md:pt-8 border-t border-white/5">
       <h4 className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] text-swarm-emerald mb-2 md:mb-3">Key Outcome</h4>
       <p className="text-slate-200 text-xs md:text-sm font-bold leading-relaxed">{benefit}</p>
     </div>
   </div>
+);
 );
 
 const StakeholderCard: React.FC<{
@@ -544,28 +550,42 @@ const UseCasesPage: React.FC = () => (
         <UseCaseCard 
           title="Data Leak Prevention (DLP)"
           target="InfoSec & CISO"
-          icon={<Shield size={28} />}
+          icon={<div className="w-full h-full flex items-center justify-center">
+          <img src={DLP_B64} 
+                alt="DLP Icon" 
+                className="w-4/5 h-4/5 object-contain" />
+          </div>}
           desc="Automated discovery and redaction of PII, PHI, and internal secrets before they leave your perimeter. Our sub-10ms proxy ensures security doesn't break the user experience."
           benefit="Enable tools like ChatGPT/Claude across the workforce while maintaining strict GDPR, SOC2, and HIPAA compliance."
         />
         <UseCaseCard 
           title="Autonomous Agent Governance"
           target="AI Architects"
-          icon={<Zap size={28} />}
+          icon={<div className="w-full h-full flex items-center justify-center">
+          <img 
+            src={AGENT_GOVERN_B64} 
+            alt="Agent Governance Icon" 
+            className="w-4/5 h-4/5 object-contain" 
+          />
+    </div>}
           desc="Autonomous swarms often experience 'agentic drift.' Swarm enforces tool-calling constraints and prevents prompt injections that could lead to unauthorized system actions."
           benefit="Deploy agentic workflows with confidence, knowing every system interaction is gated by semantic security policies."
         />
         <UseCaseCard 
           title="Shadow AI Discovery"
           target="IT Operations"
-          icon={<HardDrive size={28} />}
+          icon={<div className="w-full h-full flex items-center justify-center">
+            <img src={SHADOWAI_B64} alt="DLP Icon" className="w-4/5 h-4/5 object-contain" />
+            </div>}
           desc="Teams often bypass centralized IT to use unmanaged LLM providers. Swarm automatically maps every AI connection in your network to surface unvetted endpoints."
           benefit="Consolidate AI spend and eliminate security 'dark spots' by bringing all GenAI activity under a single management plane."
         />
         <UseCaseCard 
           title="Compliance & Audit Trails"
           target="GRC & Legal"
-          icon={<Scale size={28} />}
+          icon={<div className="w-full h-full flex items-center justify-center">
+            <img src={COMPLIANCE_B64} alt="DLP Icon" className="w-4/5 h-4/5 object-contain"  />
+            </div>}
           desc="Regulated industries require verifiable logs for advice-driven AI. Swarm records high-fidelity, immutable semantic context for every interaction for forensic review."
           benefit="Meet stringent transparency requirements and protect against liability by proving what an AI said—and why it said it."
         />
