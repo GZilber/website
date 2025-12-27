@@ -516,7 +516,6 @@ const UseCaseCard: React.FC<{
     </div>
   </div>
 );
-);
 
 const StakeholderCard: React.FC<{
   role: string;
