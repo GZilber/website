@@ -244,7 +244,7 @@ const Footer: React.FC<{ onNavigate: (p: Page) => void }> = ({ onNavigate }) => 
 
 const HomePage: React.FC<{ onOpenModal: () => void, onNavigate: (p: Page) => void }> = ({ onOpenModal, onNavigate }) => {
   return (
-    <div className="animate-in fade-in duration-700">
+    <div className="animate-in fade-in duration-700 pt-8 md:pt-16">
       <section className="relative min-h-[85vh] flex items-center py-20 lg:py-0 overflow-hidden bg-mesh">
         <div className="max-w-7xl mx-auto px-6 relative z-10 grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           <div className="space-y-6 md:space-y-8 text-center lg:text-left">
